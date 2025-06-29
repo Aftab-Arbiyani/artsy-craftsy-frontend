@@ -61,6 +61,7 @@ export default function ProfilePage() {
     toast({
       title: "Profile Updated (Simulated)",
       description: "Your profile information has been saved.",
+      variant: "success",
     });
     form.reset({ ...data, currentPassword: '', newPassword: '', confirmNewPassword: '' }); // Reset password fields
   };

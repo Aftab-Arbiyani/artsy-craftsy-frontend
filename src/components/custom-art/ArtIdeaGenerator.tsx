@@ -63,7 +63,7 @@ export default function ArtIdeaGenerator() {
       
       const result: GenerateArtIdeasOutput = await generateArtIdeas(input);
       setIdeas(result.ideas);
-      toast({ title: "Ideas Generated!", description: "Check out the AI-powered suggestions below." });
+      toast({ title: "Ideas Generated!", description: "Check out the AI-powered suggestions below.", variant: "success" });
     } catch (error) {
       console.error("Error generating art ideas:", error);
       toast({ title: "Error", description: "Failed to generate art ideas. Please try again.", variant: "destructive" });

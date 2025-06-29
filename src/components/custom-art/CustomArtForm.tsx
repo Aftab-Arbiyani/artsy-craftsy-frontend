@@ -69,6 +69,7 @@ export default function CustomArtForm() {
     toast({
       title: "Request Submitted!",
       description: "Thank you for your custom art request. We'll be in touch soon!",
+      variant: "success",
     });
     form.reset();
     setImagePreview(null);

@@ -62,6 +62,7 @@ export default function ProductDetailsPage() {
     toast({
       title: "Added to Cart",
       description: `${product.name} has been added to your cart.`,
+      variant: "success",
     });
   };
 

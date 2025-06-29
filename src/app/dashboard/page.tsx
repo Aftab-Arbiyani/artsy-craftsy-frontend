@@ -34,6 +34,7 @@ export default function DashboardPage() {
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out.",
+      variant: "success",
     });
     router.push('/login');
   };

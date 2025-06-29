@@ -23,6 +23,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
     toast({
       title: "Added to Cart",
       description: `${product.name} has been added to your cart.`,
+      variant: "success",
     });
   };
 
@@ -50,12 +51,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <CardDescription className="text-sm line-clamp-3 mb-3">{product.description}</CardDescription>
         <p className="font-semibold text-lg text-primary">${product.price.toFixed(2)}</p>
       </CardContent>
-      <CardFooter className="p-4 flex gap-2">
-        <Button onClick={handleAddToCart} className="flex-1 bg-primary hover:bg-primary/90">
+      <CardFooter className="p-4 grid grid-cols-2 gap-2">
+        <Button onClick={handleAddToCart} className="w-full bg-primary hover:bg-primary/90">
           <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
         </Button>
         <Link href={`/products/${product.id}`} passHref>
-          <Button variant="outline" className="flex-1 border-primary text-primary hover:bg-primary/10">
+          <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/10">
             <Eye className="mr-2 h-4 w-4" /> View
           </Button>
         </Link>

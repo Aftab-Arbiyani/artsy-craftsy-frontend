@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartProvider';
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -16,6 +17,7 @@ const navLinks = [
 
 const Header = () => {
   const { getItemCount } = useCart();
+  const { toast } = useToast();
   const [cartItemCount, setCartItemCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -41,8 +43,10 @@ const Header = () => {
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out.",
+      variant: "success",
     });
     router.push('/login');
+    router.refresh();
   };
 
   const NavLinkItem = ({ href, label }: { href: string; label: string }) => (
