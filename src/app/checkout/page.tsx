@@ -55,7 +55,7 @@ export default function CheckoutPage() {
     toast({
       title: "Order Placed (Simulation)",
       description: "Your order has been successfully placed. Thank you for shopping with ArtsyCraftsy!",
-      variant: "default",
+      variant: "success",
     });
     clearCart();
     router.push('/dashboard/order-history'); // Redirect to a success or order history page
