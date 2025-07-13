@@ -45,7 +45,7 @@ export default function LoginPage() {
         localStorage.setItem('device_id', deviceId);
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,8 +69,14 @@ export default function LoginPage() {
           variant: "success",
         });
 
-        if (result.data.type === 'artist' && result.data.is_profile_complete === false) {
-          router.push('/seller/complete-profile');
+        if (result.data.type === 'artist') {
+          if (result.data.is_profile_complete === false) {
+            router.push('/seller/complete-profile');
+          } else if (result.data.is_profile_complete === true && result.data.product_count < 3) {
+            router.push('/seller/complete-profile?step=publish');
+          } else {
+            router.push('/');
+          }
         } else {
           router.push('/');
         }

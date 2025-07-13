@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { UserPlus, Loader2, Eye, EyeOff } from 'lucide-react';
+import { UserPlus, Loader2, Eye, EyeOff, MailCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -44,6 +44,8 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [signupSuccessful, setSignupSuccessful] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -73,7 +75,7 @@ export default function SignupPage() {
         payload.phone_number = data.phoneNumber;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/signup`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,12 +86,8 @@ export default function SignupPage() {
       const result = await response.json();
 
       if (response.status === 201 && result.status === 1) {
-        toast({
-          title: "Account Created",
-          description: result.message || "Please check your email to verify your account.",
-          variant: "success",
-        });
-        router.push('/login');
+        setSignupSuccessful(true);
+        setUserEmail(data.email);
       } else {
         toast({
           title: "Signup Failed",
@@ -108,6 +106,39 @@ export default function SignupPage() {
       setIsLoading(false);
     }
   };
+
+  if (signupSuccessful) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-200px)] py-8 px-4">
+        <Card className="w-full max-w-lg shadow-xl text-center">
+          <CardHeader>
+            <div className="mx-auto bg-primary/10 text-primary p-4 rounded-full w-fit">
+              <MailCheck className="h-12 w-12" />
+            </div>
+            <CardTitle className="font-headline text-3xl mt-4">Check Your Email</CardTitle>
+            <CardDescription className="text-base">
+              We've sent a verification link to your email address.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground">
+              Please click the link sent to <span className="font-semibold text-foreground">{userEmail}</span> to activate your account.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              If you don't see the email, please check your spam folder.
+            </p>
+          </CardContent>
+          <CardFooter className="p-6 pt-0">
+            <Link href="/login" className="w-full">
+              <Button className="w-full bg-primary hover:bg-primary/90">
+                Back to Login
+              </Button>
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-200px)] py-8">
