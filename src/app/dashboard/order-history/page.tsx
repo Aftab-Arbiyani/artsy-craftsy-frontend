@@ -80,7 +80,7 @@ export default function OrderHistoryPage() {
                     <TableCell className="font-medium">{order.id}</TableCell>
                     <TableCell>{order.date}</TableCell>
                     <TableCell>{order.items}</TableCell>
-                    <TableCell>${order.total.toFixed(2)}</TableCell>
+                    <TableCell>₹{order.total.toLocaleString('en-IN')}</TableCell>
                     <TableCell>
                       <Badge variant={order.status === 'Delivered' ? 'default' : order.status === 'Shipped' ? 'secondary' : 'outline'}>
                         {order.status}

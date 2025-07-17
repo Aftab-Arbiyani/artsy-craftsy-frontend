@@ -218,7 +218,7 @@ export default function CheckoutPage() {
               </section>
               
               <div className="text-right font-bold text-lg sm:text-xl my-6">
-                Total: ${getTotalPrice().toFixed(2)}
+                Total: ₹{getTotalPrice().toLocaleString('en-IN')}
               </div>
               
               <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary/90">
