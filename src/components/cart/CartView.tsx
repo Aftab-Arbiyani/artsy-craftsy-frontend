@@ -112,7 +112,7 @@ export default function CartView() {
                 <h3 className="font-headline text-lg font-semibold">{item.product.name}</h3>
               </Link>
               <p className="text-sm text-muted-foreground">{item.product.category}</p>
-              <p className="text-md font-semibold text-primary mt-1">${item.product.price.toFixed(2)}</p>
+              <p className="text-md font-semibold mt-1">₹{item.product.price.toLocaleString('en-IN')}</p>
             </div>
             <div className="flex items-center space-x-2 sm:ml-auto shrink-0">
               <Button variant="outline" size="icon" onClick={() => updateQuantity(item.product.id, item.quantity - 1)} className="h-8 w-8">
@@ -144,7 +144,7 @@ export default function CartView() {
           <CardContent className="space-y-4">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>${getTotalPrice().toFixed(2)}</span>
+              <span>₹{getTotalPrice().toLocaleString('en-IN')}</span>
             </div>
             <div className="flex justify-between">
               <span>Shipping</span>
@@ -153,7 +153,7 @@ export default function CartView() {
             <Separator />
             <div className="flex justify-between font-bold text-xl">
               <span>Total</span>
-              <span>${getTotalPrice().toFixed(2)}</span>
+              <span>₹{getTotalPrice().toLocaleString('en-IN')}</span>
             </div>
           </CardContent>
           <CardFooter className="flex-col gap-2">

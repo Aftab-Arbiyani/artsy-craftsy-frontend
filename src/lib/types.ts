@@ -3,7 +3,7 @@ export type Product = {
   name: string;
   description: string;
   price: number;
-  category: 'Painting' | 'Sculpture' | 'Digital Art' | 'Photography';
+  category: string; // Allow any string for category name
   imageUrl: string;
   artist?: string;
   dimensions?: string;
@@ -25,3 +25,10 @@ export type CustomArtRequest = {
   userName?: string; // Assuming user context might provide this
   userEmail?: string;
 };
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  image: string;
+}

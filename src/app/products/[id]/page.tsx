@@ -113,7 +113,7 @@ export default function ProductDetailsPage() {
               </div>
               <Separator />
               <div className="flex items-center justify-between">
-                <p className="text-3xl sm:text-4xl font-semibold text-primary">${product.price.toFixed(2)}</p>
+                <p className="text-3xl sm:text-4xl font-semibold">₹{product.price.toLocaleString('en-IN')}</p>
                 <Button size="lg" onClick={handleAddToCart} className="bg-primary hover:bg-primary/90">
                   <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
                 </Button>
@@ -136,7 +136,7 @@ export default function ProductDetailsPage() {
                   <CardContent className="p-4">
                     <h3 className="font-headline text-lg font-medium truncate group-hover:text-primary">{rp.name}</h3>
                     <p className="text-sm text-muted-foreground">{rp.category}</p>
-                    <p className="text-md font-semibold mt-1">${rp.price.toFixed(2)}</p>
+                    <p className="text-md font-semibold mt-1">₹{rp.price.toLocaleString('en-IN')}</p>
                   </CardContent>
                 </Card>
               </Link>
