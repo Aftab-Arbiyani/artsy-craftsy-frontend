@@ -4,11 +4,12 @@ export type Product = {
   description: string;
   price: number;
   category: string; // Allow any string for category name
-  imageUrl: string;
+  imageUrls: string[];
   artist?: string;
   dimensions?: string;
   medium?: string;
   dataAiHint?: string;
+  discount?: number;
 };
 
 export type CartItem = {
@@ -20,7 +21,7 @@ export type CustomArtRequest = {
   id: string;
   description: string;
   imageUrl?: string;
-  status: 'Pending' | 'In Progress' | 'Completed' | 'Cancelled';
+  status: "Pending" | "In Progress" | "Completed" | "Cancelled";
   createdAt: Date;
   userName?: string; // Assuming user context might provide this
   userEmail?: string;

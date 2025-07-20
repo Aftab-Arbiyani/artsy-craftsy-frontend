@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast";
 import {
   Toast,
   ToastClose,
@@ -8,20 +8,29 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-} from "@/components/ui/toast"
-import { CheckCircle, Info, XCircle } from "lucide-react"
+} from "@/components/ui/toast";
+import { CheckCircle, Info, XCircle } from "lucide-react";
 
 export function Toaster() {
-  const { toasts } = useToast()
+  const { toasts } = useToast();
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, variant, ...props }) {
+      {toasts.map(function ({
+        id,
+        title,
+        description,
+        action,
+        variant,
+        ...props
+      }) {
         const Icon =
-          variant === 'success' ? CheckCircle :
-          variant === 'destructive' ? XCircle :
-          Info;
-          
+          variant === "success"
+            ? CheckCircle
+            : variant === "destructive"
+              ? XCircle
+              : Info;
+
         return (
           <Toast key={id} {...props} variant={variant}>
             <div className="flex items-start space-x-3">
@@ -36,9 +45,9 @@ export function Toaster() {
             {action}
             <ToastClose />
           </Toast>
-        )
+        );
       })}
       <ToastViewport />
     </ToastProvider>
-  )
+  );
 }
