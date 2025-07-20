@@ -1,4 +1,3 @@
-
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import MinimalProductCardSkeleton from "./MinimalProductCardSkeleton";
@@ -33,7 +32,7 @@ export default function ProductDetailsSkeleton() {
           </div>
         </div>
       </Card>
-      
+
       <div>
         <Skeleton className="h-8 w-1/3 mb-6" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

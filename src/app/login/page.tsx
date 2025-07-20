@@ -1,18 +1,25 @@
-'use client';
+"use client";
 
-import { useForm, type SubmitHandler } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { LogIn, Loader2, Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import Image from 'next/image';
-import { Icons } from '@/components/shared/Icons';
+import { useForm, type SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { LogIn, Loader2, Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Image from "next/image";
+import { Icons } from "@/components/shared/Icons";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -29,7 +36,7 @@ export default function LoginPage() {
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: "", password: "" },
   });
 
   const onSubmit: SubmitHandler<LoginFormValues> = async (data) => {
@@ -40,30 +47,33 @@ export default function LoginPage() {
       const deviceType = isMobile ? "mobile" : "web";
 
       // Generate or retrieve a unique device id stored in localStorage
-      let deviceId = localStorage.getItem('device_id');
+      let deviceId = localStorage.getItem("device_id");
       if (!deviceId) {
         deviceId = `device-${Math.random().toString(36).slice(2)}`;
-        localStorage.setItem('device_id', deviceId);
+        localStorage.setItem("device_id", deviceId);
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: data.email,
+            password: data.password,
+            device_id: deviceId,
+            device_type: deviceType,
+          }),
         },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          device_id: deviceId,
-          device_type: deviceType,
-        }),
-      });
+      );
 
       const result = await response.json();
 
       if (response.ok && result.status === 1) {
-        localStorage.setItem('authToken', result.data.jwt);
-        localStorage.setItem('user', JSON.stringify(result.data));
+        localStorage.setItem("authToken", result.data.jwt);
+        localStorage.setItem("user", JSON.stringify(result.data));
         toast({
           title: "Login Successful",
           description: result.message || "Welcome back to ArtsyCraftsy!",
@@ -71,28 +81,32 @@ export default function LoginPage() {
         });
 
         const userProductCount = Number(result.data.product_count);
-        if (result.data.type === 'artist') {
+        if (result.data.type === "artist") {
           if (result.data.is_profile_complete === false) {
-            router.push('/seller/complete-profile');
-          } else if (result.data.is_profile_complete === true && userProductCount < 3) {
-            router.push('/seller/complete-profile?step=publish');
+            router.push("/seller/complete-profile");
+          } else if (
+            result.data.is_profile_complete === true &&
+            userProductCount < 3
+          ) {
+            router.push("/seller/complete-profile?step=publish");
           } else {
-            router.push('/');
+            router.push("/");
           }
         } else {
-          router.push('/');
+          router.push("/");
         }
 
         router.refresh(); // To update header state
       } else {
         toast({
           title: "Login Failed",
-          description: result.message || `An error occurred: ${response.statusText}`,
+          description:
+            result.message || `An error occurred: ${response.statusText}`,
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       toast({
         title: "An Error Occurred",
         description: "Could not connect to the server. Please try again later.",
@@ -117,8 +131,12 @@ export default function LoginPage() {
             data-ai-hint="indian art"
           />
           <div className="absolute bottom-10 left-10 z-20">
-            <h2 className="text-4xl font-bold text-white shadow-2xl">Two Friends</h2>
-            <p className="text-lg text-white/90 shadow-lg">By Varsha Kharatmal</p>
+            <h2 className="text-4xl font-bold text-white shadow-2xl">
+              Two Friends
+            </h2>
+            <p className="text-lg text-white/90 shadow-lg">
+              By Varsha Kharatmal
+            </p>
           </div>
         </div>
         <div className="flex items-center justify-center py-12">
@@ -128,7 +146,10 @@ export default function LoginPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-4">
-              <Button variant="outline" className="hover:bg-background hover:text-foreground">
+              <Button
+                variant="outline"
+                className="hover:bg-background hover:text-foreground"
+              >
                 <Icons.google className="mr-2 h-4 w-4" />
                 Login with Google
               </Button>
@@ -146,7 +167,10 @@ export default function LoginPage() {
             </div>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="grid gap-4"
+              >
                 <FormField
                   control={form.control}
                   name="email"
@@ -156,7 +180,13 @@ export default function LoginPage() {
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input type="email" placeholder="you@example.com" {...field} disabled={isLoading} className="pl-10" />
+                          <Input
+                            type="email"
+                            placeholder="you@example.com"
+                            {...field}
+                            disabled={isLoading}
+                            className="pl-10"
+                          />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -191,7 +221,9 @@ export default function LoginPage() {
                             type="button"
                             onClick={() => setShowPassword((prev) => !prev)}
                             className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
-                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            aria-label={
+                              showPassword ? "Hide password" : "Show password"
+                            }
                             disabled={isLoading}
                           >
                             {showPassword ? (
@@ -206,7 +238,11 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
+                <Button
+                  type="submit"
+                  className="w-full bg-primary hover:bg-primary/90"
+                  disabled={isLoading}
+                >
                   {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
@@ -218,10 +254,23 @@ export default function LoginPage() {
             </Form>
             <div className="mt-8 space-y-4 text-center text-sm">
               <p className="text-foreground">
-                Create your <span className="font-bold">Collector</span> account <Link href="/signup?type=customer" className="underline text-red-500 font-medium">SignUp</Link>
+                Create your <span className="font-bold">Collector</span> account{" "}
+                <Link
+                  href="/signup?type=customer"
+                  className="underline text-red-500 font-medium"
+                >
+                  SignUp
+                </Link>
               </p>
               <p className="text-foreground">
-                Create your <span className="font-bold">Seller Artist</span> account <Link href="/signup?type=artist" className="underline text-red-500 font-medium">Register Now</Link>
+                Create your <span className="font-bold">Seller Artist</span>{" "}
+                account{" "}
+                <Link
+                  href="/signup?type=artist"
+                  className="underline text-red-500 font-medium"
+                >
+                  Register Now
+                </Link>
               </p>
             </div>
           </div>

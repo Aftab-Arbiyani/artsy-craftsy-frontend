@@ -1,4 +1,3 @@
-
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableCell, TableRow } from "@/components/ui/table";
 
@@ -7,7 +6,10 @@ interface TableRowSkeletonProps {
   rowCount?: number;
 }
 
-export default function TableRowSkeleton({ columns, rowCount = 1 }: TableRowSkeletonProps) {
+export default function TableRowSkeleton({
+  columns,
+  rowCount = 1,
+}: TableRowSkeletonProps) {
   return (
     <>
       {Array.from({ length: rowCount }).map((_, rowIndex) => (

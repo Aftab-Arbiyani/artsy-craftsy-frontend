@@ -1,20 +1,44 @@
-
-'use client';
+"use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { PackageSearch, ArrowLeft } from "lucide-react";
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import TableRowSkeleton from "@/components/skeletons/TableRowSkeleton";
 
 // Placeholder data
 const mockOrdersData = [
-  { id: "ORD001", date: "2023-10-26", total: 450, status: "Delivered", items: 1 },
+  {
+    id: "ORD001",
+    date: "2023-10-26",
+    total: 450,
+    status: "Delivered",
+    items: 1,
+  },
   { id: "ORD002", date: "2023-11-15", total: 780, status: "Shipped", items: 1 },
-  { id: "ORD003", date: "2023-12-01", total: 150, status: "Processing", items: 1 },
+  {
+    id: "ORD003",
+    date: "2023-12-01",
+    total: 150,
+    status: "Processing",
+    items: 1,
+  },
 ];
 
 export default function OrderHistoryPage() {
@@ -33,17 +57,21 @@ export default function OrderHistoryPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/dashboard" passHref>
-            <Button variant="outline" size="icon">
-                <ArrowLeft className="h-4 w-4"/>
-            </Button>
+          <Button variant="outline" size="icon">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
         </Link>
-        <h1 className="font-headline text-2xl sm:text-3xl font-semibold">Order History</h1>
+        <h1 className="font-headline text-2xl sm:text-3xl font-semibold">
+          Order History
+        </h1>
       </div>
-      
+
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle>Your Orders</CardTitle>
-          <CardDescription>Review your past and current orders.</CardDescription>
+          <CardDescription>
+            Review your past and current orders.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -80,14 +108,26 @@ export default function OrderHistoryPage() {
                     <TableCell className="font-medium">{order.id}</TableCell>
                     <TableCell>{order.date}</TableCell>
                     <TableCell>{order.items}</TableCell>
-                    <TableCell>₹{order.total.toLocaleString('en-IN')}</TableCell>
                     <TableCell>
-                      <Badge variant={order.status === 'Delivered' ? 'default' : order.status === 'Shipped' ? 'secondary' : 'outline'}>
+                      ₹{order.total.toLocaleString("en-IN")}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          order.status === "Delivered"
+                            ? "default"
+                            : order.status === "Shipped"
+                              ? "secondary"
+                              : "outline"
+                        }
+                      >
                         {order.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="link" size="sm" className="text-primary">View Details</Button>
+                      <Button variant="link" size="sm" className="text-primary">
+                        View Details
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -96,7 +136,9 @@ export default function OrderHistoryPage() {
           ) : (
             <div className="text-center py-12">
               <PackageSearch className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-              <p className="text-xl text-muted-foreground">You haven't placed any orders yet.</p>
+              <p className="text-xl text-muted-foreground">
+                You haven't placed any orders yet.
+              </p>
               <Link href="/products" className="mt-4 inline-block">
                 <Button>Start Shopping</Button>
               </Link>
