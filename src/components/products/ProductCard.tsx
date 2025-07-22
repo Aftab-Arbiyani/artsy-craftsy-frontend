@@ -37,7 +37,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
     : product.price;
 
   return (
-    <Card className="flex flex-col h-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
       <CardHeader className="p-0">
         <Link href={`/products/${product.id}`} className="block group">
           <div className="relative w-full overflow-hidden">
