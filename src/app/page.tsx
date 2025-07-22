@@ -183,39 +183,39 @@ export default function Home() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
           {isLoadingCategories
             ? Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="text-center">
-                  <Skeleton className="aspect-square w-full rounded-lg mb-2" />
-                  <Skeleton className="h-5 w-3/4 mx-auto" />
-                </div>
-              ))
+              <div key={index} className="text-center">
+                <Skeleton className="aspect-square w-full rounded-lg mb-2" />
+                <Skeleton className="h-5 w-3/4 mx-auto" />
+              </div>
+            ))
             : categories.map((category, index) => (
-                <Link
-                  href={`/products?category=${category.id}`}
-                  key={category.id}
-                  passHref
+              <Link
+                href={`/products?category=${category.id}`}
+                key={category.id}
+                passHref
+              >
+                <div
+                  className="group text-center animate-in fade-in slide-in-from-bottom-4 duration-500"
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div
-                    className="group text-center animate-in fade-in slide-in-from-bottom-4 duration-500"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <div className="aspect-square relative w-full overflow-hidden rounded-lg mb-2 shadow-md group-hover:shadow-xl transition-shadow">
-                      <Image
-                        src={
-                          category.image || `https://placehold.co/400x400.png`
-                        }
-                        alt={category.name}
-                        fill
-                        sizes="(max-width: 639px) 50vw, (max-width: 767px) 33vw, (max-width: 1023px) 25vw, 16vw"
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        data-ai-hint={category.name.toLowerCase()}
-                      />
-                    </div>
-                    <h3 className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">
-                      {category.name}
-                    </h3>
+                  <div className="aspect-square relative w-full overflow-hidden rounded-lg mb-2 shadow-md group-hover:shadow-xl transition-shadow">
+                    <Image
+                      src={
+                        category.image || `https://placehold.co/400x400.png`
+                      }
+                      alt={category.name}
+                      fill
+                      sizes="(max-width: 639px) 50vw, (max-width: 767px) 33vw, (max-width: 1023px) 25vw, 16vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      data-ai-hint={category.name.toLowerCase()}
+                    />
                   </div>
-                </Link>
-              ))}
+                  <h3 className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">
+                    {category.name}
+                  </h3>
+                </div>
+              </Link>
+            ))}
         </div>
       </section>
 
@@ -224,24 +224,24 @@ export default function Home() {
         <h2 className="font-headline text-4xl font-semibold mb-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
           Featured Artwork
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
           {isLoadingFeatured
             ? Array.from({ length: 8 }).map((_, index) => (
-                <div
-                  key={index}
-                  className={`animate-in fade-in slide-in-from-bottom-4 duration-500 delay-[${index * 150 + 300}ms]`}
-                >
-                  <ProductCardSkeleton />
-                </div>
-              ))
+              <div
+                key={index}
+                className={`animate-in fade-in slide-in-from-bottom-4 duration-500 delay-[${index * 150 + 300}ms]`}
+              >
+                <ProductCardSkeleton />
+              </div>
+            ))
             : featuredProducts.map((product, index) => (
-                <div
-                  key={product.id}
-                  className={`animate-in fade-in slide-in-from-bottom-4 duration-500 delay-[${index * 150 + 300}ms]`}
-                >
-                  <ProductCard product={product} />
-                </div>
-              ))}
+              <div
+                key={product.id}
+                className={`animate-in fade-in slide-in-from-bottom-4 duration-500 delay-[${index * 150 + 300}ms]`}
+              >
+                <ProductCard product={product} />
+              </div>
+            ))}
         </div>
         <div className="text-center mt-12">
           <Link href="/products" passHref>
