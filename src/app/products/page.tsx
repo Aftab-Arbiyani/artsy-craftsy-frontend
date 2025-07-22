@@ -332,31 +332,31 @@ function ProductsPageComponent() {
                   <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
                     {allCategories.length === 0
                       ? Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="flex items-center space-x-2">
-                          <Skeleton className="h-4 w-4" />
-                          <Skeleton className="h-4 w-3/4" />
-                        </div>
-                      ))
+                          <div key={i} className="flex items-center space-x-2">
+                            <Skeleton className="h-4 w-4" />
+                            <Skeleton className="h-4 w-3/4" />
+                          </div>
+                        ))
                       : allCategories.map((category) => (
-                        <div
-                          key={category.id}
-                          className="flex items-center space-x-2"
-                        >
-                          <Checkbox
-                            id={`cat-${category.id}`}
-                            checked={selectedCategories.includes(category.id)}
-                            onCheckedChange={(checked) =>
-                              handleCategoryChange(category.id, !!checked)
-                            }
-                          />
-                          <label
-                            htmlFor={`cat-${category.id}`}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          <div
+                            key={category.id}
+                            className="flex items-center space-x-2"
                           >
-                            {category.name}
-                          </label>
-                        </div>
-                      ))}
+                            <Checkbox
+                              id={`cat-${category.id}`}
+                              checked={selectedCategories.includes(category.id)}
+                              onCheckedChange={(checked) =>
+                                handleCategoryChange(category.id, !!checked)
+                              }
+                            />
+                            <label
+                              htmlFor={`cat-${category.id}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {category.name}
+                            </label>
+                          </div>
+                        ))}
                   </div>
                 </AccordionContent>
               </AccordionItem>

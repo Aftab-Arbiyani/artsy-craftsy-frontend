@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { CartProvider } from "@/context/CartProvider";
-import { Suspense } from 'react';
-import HeaderSkeleton from '@/components/skeletons/HeaderSkeleton';
+import { Suspense } from "react";
+import HeaderSkeleton from "@/components/skeletons/HeaderSkeleton";
 
 export const metadata: Metadata = {
   title: "ArtsyCraftsy - Your destination for unique art",
