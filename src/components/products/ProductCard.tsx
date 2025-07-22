@@ -37,14 +37,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
     : product.price;
 
   return (
-    <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
+    <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
       <CardHeader className="p-0">
         <Link href={`/products/${product.id}`} className="block group">
-          <div className="relative w-full overflow-hidden aspect-[4/3]">
+          <div className="relative w-full overflow-hidden">
             <Image
               src={firstImageUrl}
               alt={product.name}
-              fill
+              width={600}
+              height={400}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover w-full h-auto group-hover:scale-105 transition-transform duration-300"
               data-ai-hint={product.dataAiHint || "art product"}

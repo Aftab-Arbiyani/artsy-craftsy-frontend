@@ -20,7 +20,7 @@ import {
   X,
 } from "lucide-react";
 import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -487,9 +487,11 @@ function ProductsPageComponent() {
             </div>
           ) : products.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+              <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
                 {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <div key={product.id} className="break-inside-avoid">
+                    <ProductCard product={product} />
+                  </div>
                 ))}
               </div>
               {totalPages > 1 && (
@@ -538,6 +540,9 @@ export default function ProductsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
           <aside className="lg:col-span-1 lg:sticky top-24">
             <Card className="p-4">
+              <CardHeader className="p-2 pt-0">
+                <Skeleton className="h-8 w-1/2" />
+              </CardHeader>
               <CardContent className="p-0">
                 <div className="space-y-4">
                   <Skeleton className="h-10 w-full" />
