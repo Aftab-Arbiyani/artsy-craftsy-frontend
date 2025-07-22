@@ -151,8 +151,8 @@ export default function Home() {
                 ArtsyCraftsy is your premier destination for exquisite
                 paintings, sculptures, and custom art commissions.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <Link href="/products" passHref className="w-full sm:w-auto">
+              <div className="mx-auto mt-6 grid max-w-sm grid-cols-1 gap-4 sm:max-w-md sm:grid-cols-2">
+                <Link href="/products" passHref>
                   <Button
                     size="lg"
                     className="bg-primary hover:bg-primary/90 text-primary-foreground w-full"
@@ -160,7 +160,7 @@ export default function Home() {
                     Explore Collection <Palette className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Link href="/custom-art" passHref className="w-full sm:w-auto">
+                <Link href="/custom-art" passHref>
                   <Button
                     size="lg"
                     variant="outline"
@@ -224,7 +224,7 @@ export default function Home() {
         <h2 className="font-headline text-4xl font-semibold mb-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
           Featured Artwork
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 items-start">
           {isLoadingFeatured
             ? Array.from({ length: 8 }).map((_, index) => (
                 <div

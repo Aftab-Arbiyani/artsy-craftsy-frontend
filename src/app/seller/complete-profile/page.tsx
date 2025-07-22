@@ -660,47 +660,26 @@ function CompleteProfilePageComponent() {
                     control={form.control}
                     name="dob"
                     render={({ field }) => {
-                      const [dateString, setDateString] = useState<string>(
-                        field.value ? format(field.value, "dd-MM-yyyy") : "",
-                      );
+                      const [dateString, setDateString] = useState<string>("");
                       const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
                       useEffect(() => {
                         if (field.value) {
-                          const formatted = format(field.value, "dd-MM-yyyy");
-                          if (formatted !== dateString) {
-                            setDateString(formatted);
-                          }
-                        } else if (dateString !== "") {
+                          setDateString(format(field.value, "dd-MM-yyyy"));
+                        } else {
                           setDateString("");
                         }
-                      }, [field.value, dateString]);
+                      }, [field.value]);
 
                       const handleDateSelect = (date: Date | undefined) => {
                         field.onChange(date);
                         setIsPopoverOpen(false);
-                        if (date) {
-                          setDateString(format(date, "dd-MM-yyyy"));
-                        } else {
-                          setDateString("");
-                        }
                       };
 
                       const handleInputChange = (
                         e: React.ChangeEvent<HTMLInputElement>,
                       ) => {
-                        let value = e.target.value;
-                        setDateString(value);
-
-                        let digits = value.replace(/\D/g, "");
-                        if (digits.length > 2 && digits.length <= 4) {
-                          value = `${digits.slice(0, 2)}-${digits.slice(2)}`;
-                        } else if (digits.length > 4) {
-                          value = `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4, 8)}`;
-                        } else {
-                          value = digits;
-                        }
-                        setDateString(value);
+                        setDateString(e.target.value);
                       };
 
                       const handleInputBlur = () => {
@@ -710,16 +689,9 @@ function CompleteProfilePageComponent() {
                           new Date(),
                         );
                         if (isValid(parsedDate)) {
-                          if (
-                            !field.value ||
-                            field.value.getTime() !== parsedDate.getTime()
-                          ) {
-                            field.onChange(parsedDate);
-                          }
+                          field.onChange(parsedDate);
                         } else {
-                          if (dateString === "") {
-                            field.onChange(undefined);
-                          }
+                          field.onChange(undefined);
                         }
                       };
 

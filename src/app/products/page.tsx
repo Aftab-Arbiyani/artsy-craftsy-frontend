@@ -20,7 +20,7 @@ import {
   X,
 } from "lucide-react";
 import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -229,6 +229,12 @@ function ProductsPageComponent() {
   const applyPriceChange = () => {
     const newMin = parseFloat(minPriceInput) || 0;
     const newMax = parseFloat(maxPriceInput) || 100000;
+
+    // Only call API if the price range has actually changed
+    if (newMin === priceRange[0] && newMax === priceRange[1]) {
+      return;
+    }
+
     const newPriceRange: [number, number] = [newMin, newMax];
     setPriceRange(newPriceRange);
     setCurrentPage(1);
@@ -315,15 +321,8 @@ function ProductsPageComponent() {
       {/* Filters Sidebar */}
       <aside className="lg:col-span-1 lg:sticky top-24">
         <Card className="p-4">
-          <CardHeader className="p-2 pt-0">
-            <CardTitle>Filters</CardTitle>
-          </CardHeader>
           <CardContent className="p-0">
-            <Accordion
-              type="multiple"
-              defaultValue={["category", "orientation", "price"]}
-              className="w-full"
-            >
+            <Accordion type="multiple" className="w-full">
               <AccordionItem value="category">
                 <AccordionTrigger className="text-base font-semibold py-2">
                   Category
@@ -408,27 +407,37 @@ function ProductsPageComponent() {
                       onValueCommit={handlePriceSliderCommit}
                     />
                     <div className="flex justify-between items-center gap-2">
-                      <Input
-                        type="number"
-                        placeholder="Min"
-                        value={minPriceInput}
-                        onChange={(e) =>
-                          handlePriceInputChange("min", e.target.value)
-                        }
-                        onBlur={applyPriceChange}
-                        className="w-full h-9"
-                      />
+                      <div className="relative w-full">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                          ₹
+                        </span>
+                        <Input
+                          type="number"
+                          placeholder="Min"
+                          value={minPriceInput}
+                          onChange={(e) =>
+                            handlePriceInputChange("min", e.target.value)
+                          }
+                          onBlur={applyPriceChange}
+                          className="w-full h-9 pl-6 hide-number-arrows"
+                        />
+                      </div>
                       <span className="text-muted-foreground">-</span>
-                      <Input
-                        type="number"
-                        placeholder="Max"
-                        value={maxPriceInput}
-                        onChange={(e) =>
-                          handlePriceInputChange("max", e.target.value)
-                        }
-                        onBlur={applyPriceChange}
-                        className="w-full h-9"
-                      />
+                      <div className="relative w-full">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                          ₹
+                        </span>
+                        <Input
+                          type="number"
+                          placeholder="Max"
+                          value={maxPriceInput}
+                          onChange={(e) =>
+                            handlePriceInputChange("max", e.target.value)
+                          }
+                          onBlur={applyPriceChange}
+                          className="w-full h-9 pl-6 hide-number-arrows"
+                        />
+                      </div>
                     </div>
                   </div>
                 </AccordionContent>
@@ -471,14 +480,14 @@ function ProductsPageComponent() {
           )}
 
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
               {Array.from({ length: 9 }).map((_, index) => (
                 <ProductCardSkeleton key={index} />
               ))}
             </div>
           ) : products.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -529,9 +538,6 @@ export default function ProductsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
           <aside className="lg:col-span-1 lg:sticky top-24">
             <Card className="p-4">
-              <CardHeader className="p-2 pt-0">
-                <Skeleton className="h-8 w-1/2" />
-              </CardHeader>
               <CardContent className="p-0">
                 <div className="space-y-4">
                   <Skeleton className="h-10 w-full" />
@@ -545,7 +551,7 @@ export default function ProductsPage() {
             <div className="flex justify-center">
               <Skeleton className="h-10 w-full max-w-md" />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
               {Array.from({ length: 9 }).map((_, index) => (
                 <ProductCardSkeleton key={index} />
               ))}
