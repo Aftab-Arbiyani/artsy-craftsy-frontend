@@ -8,7 +8,9 @@ const Logo = () => {
       className="flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors"
     >
       <Palette size={32} />
-      <span className="font-headline text-3xl font-bold">ArtsyCraftsy</span>
+      <span className="font-headline text-xl sm:text-2xl md:text-3xl font-bold">
+        ArtsyCraftsy
+      </span>
     </Link>
   );
 };

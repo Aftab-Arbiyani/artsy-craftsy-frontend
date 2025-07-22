@@ -29,6 +29,7 @@ const Header = () => {
   const { toast } = useToast();
   const [cartItemCount, setCartItemCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userType, setUserType] = useState<string | null>(null);
   const pathname = usePathname();
@@ -53,8 +54,9 @@ const Header = () => {
     } else {
       router.push("/products");
     }
-    // Optionally close mobile menu if search is submitted from there
+    // Close mobile menus on submit
     setIsMobileMenuOpen(false);
+    setIsMobileSearchOpen(false);
   };
 
   useEffect(() => {
@@ -80,6 +82,7 @@ const Header = () => {
   useEffect(() => {
     // Close mobile menu on route change
     setIsMobileMenuOpen(false);
+    setIsMobileSearchOpen(false);
   }, [pathname]);
 
   const handleLogout = () => {
@@ -109,25 +112,40 @@ const Header = () => {
 
   return (
     <header className="bg-card shadow-md sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Logo />
-        <nav className="hidden md:flex items-center space-x-2">
-          {navLinks.map((link) => (
-            <NavLinkItem key={link.href} {...link} />
-          ))}
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center gap-2">
+        {/* Left Section - Logo */}
+        <div className="flex-shrink-0">
+          <Logo />
+        </div>
 
-          <form onSubmit={handleSearchSubmit} className="relative ml-4">
+        {/* Middle Section - Desktop Search & Nav */}
+        <nav className="hidden md:flex justify-center items-center space-x-1">
+          <form
+            onSubmit={handleSearchSubmit}
+            className="relative w-full max-w-sm mr-4"
+          >
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search artworks..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-9 w-48 lg:w-64"
+              className="pl-10 h-9 w-full"
             />
           </form>
+          {navLinks.map((link) => (
+            <NavLinkItem key={link.href} {...link} />
+          ))}
+        </nav>
 
+        {/* Right Section - Desktop Actions */}
+        <div className="hidden md:flex flex-shrink-0 justify-end items-center space-x-1">
           <Link href="/cart" passHref>
-            <Button variant="ghost" size="icon" aria-label="Shopping Cart">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Shopping Cart"
+              className="relative"
+            >
               <ShoppingCart />
               {cartItemCount > 0 && (
                 <span className="absolute top-1 right-1 bg-accent text-accent-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -145,27 +163,38 @@ const Header = () => {
                 </Button>
               </Link>
               <Button variant="ghost" onClick={handleLogout} size="sm">
-                <LogOut className="mr-2 h-4 w-4" /> Log Out
+                <LogOut className="mr-2 h-4 w-4" />
               </Button>
             </>
           ) : (
             <>
               <Link href="/login" passHref>
-                <Button variant="ghost">Log In</Button>
+                <Button variant="ghost" size="sm">
+                  Log In
+                </Button>
               </Link>
               <Link href="/signup?type=customer" passHref>
-                <Button>Sign Up</Button>
+                <Button size="sm">Sign Up</Button>
               </Link>
             </>
           )}
-        </nav>
-        <div className="md:hidden">
+        </div>
+
+        {/* Right Section - Mobile Nav Trigger */}
+        <div className="md:hidden flex-shrink-0 flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsMobileSearchOpen(true)}
+          >
+            <Search />
+          </Button>
           <Link href="/cart" passHref>
             <Button
               variant="ghost"
               size="icon"
               aria-label="Shopping Cart"
-              className="relative mr-2"
+              className="relative"
             >
               <ShoppingCart />
               {cartItemCount > 0 && (
@@ -175,6 +204,13 @@ const Header = () => {
               )}
             </Button>
           </Link>
+          {isLoggedIn && (
+            <Link href="/dashboard" passHref>
+              <Button variant="ghost" size="icon" aria-label="User Dashboard">
+                <UserCircle />
+              </Button>
+            </Link>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -184,36 +220,46 @@ const Header = () => {
           </Button>
         </div>
       </div>
-      {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-card shadow-lg py-2 z-40">
-          <nav className="flex flex-col items-center space-y-2 px-4">
-            <form
-              onSubmit={handleSearchSubmit}
-              className="relative w-full my-2"
-            >
+
+      {/* Mobile Search Overlay */}
+      {isMobileSearchOpen && (
+        <div className="md:hidden absolute top-full left-0 right-0 bg-card shadow-lg p-2 z-40 animate-in fade-in slide-in-from-top-2 duration-300">
+          <form
+            onSubmit={handleSearchSubmit}
+            className="flex gap-2 items-center"
+          >
+            <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search artworks..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-full"
+                className="pl-10 h-10 w-full"
+                autoFocus
               />
-            </form>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              type="button"
+              onClick={() => setIsMobileSearchOpen(false)}
+            >
+              <X />
+            </Button>
+          </form>
+        </div>
+      )}
 
+      {/* Mobile Menu Content */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 right-0 bg-card shadow-lg py-2 z-30 animate-in fade-in slide-in-from-top-2 duration-300">
+          <nav className="flex flex-col items-center space-y-2 px-4">
             {navLinks.map((link) => (
               <NavLinkItem key={link.href} {...link} />
             ))}
 
             {isLoggedIn ? (
               <div className="flex flex-col space-y-2 w-full border-t border-border pt-2 mt-2">
-                <Link href="/dashboard" passHref className="w-full">
-                  <Button
-                    variant={pathname === "/dashboard" ? "secondary" : "ghost"}
-                    className="w-full"
-                  >
-                    <UserCircle className="mr-2" /> Dashboard
-                  </Button>
-                </Link>
                 <Button
                   variant="outline"
                   className="w-full"
@@ -229,7 +275,7 @@ const Header = () => {
                     Log In
                   </Button>
                 </Link>
-                <Link href="/signup" passHref className="w-full">
+                <Link href="/signup?type=customer" passHref className="w-full">
                   <Button className="w-full">Sign Up</Button>
                 </Link>
               </div>

@@ -4,13 +4,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import type { Product } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   ShoppingCart,
   Ruler,
@@ -24,13 +18,17 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import ProductDetailsSkeleton from "@/components/skeletons/ProductDetailsSkeleton";
 import { cn } from "@/lib/utils";
+import { mockProducts } from "@/lib/mockData";
+import MinimalProductCard from "@/components/products/MinimalProductCard";
 
 export default function ProductDetailsPage() {
   const params = useParams();
   const { id } = params;
-  const [product, setProduct] = useState<Product | undefined | null>(undefined); // null for not found, undefined for loading
+  const [product, setProduct] = useState<Product | undefined | null>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string>("");
+
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
 
   const { addItem } = useCart();
   const { toast } = useToast();
@@ -83,6 +81,16 @@ export default function ProductDetailsPage() {
           if (transformedProduct.imageUrls.length > 0) {
             setSelectedImage(transformedProduct.imageUrls[0]);
           }
+
+          // Mock fetching related products
+          const filteredRelated = mockProducts
+            .filter(
+              (p) =>
+                p.category === transformedProduct.category &&
+                p.id !== transformedProduct.id,
+            )
+            .slice(0, 3);
+          setRelatedProducts(filteredRelated);
         } else {
           setProduct(null);
         }
@@ -126,123 +134,167 @@ export default function ProductDetailsPage() {
     });
   };
 
-  const hasDiscount =
-    typeof product.discount === "number" && product.discount > 0;
-  const discountedPrice =
-    hasDiscount && product.discount !== undefined
-      ? product.price * (1 - product.discount / 100)
-      : product.price;
+  const hasDiscount = !!product.discount && product.discount > 0;
+  const discountedPrice = hasDiscount
+    ? product.price * (1 - (product.discount ?? 0) / 100)
+    : product.price;
 
   return (
-    <div className="space-y-12">
-      <Card className="overflow-hidden shadow-xl">
-        <div className="grid md:grid-cols-2 gap-0">
-          <div className="p-4">
-            <div className="relative aspect-[4/3] md:aspect-auto min-h-[300px] md:min-h-[500px] w-full overflow-hidden rounded-lg">
-              {hasDiscount && (
-                <div className="absolute top-4 right-4 bg-destructive text-destructive-foreground text-sm font-bold px-3 py-1.5 rounded-full z-10">
-                  {product.discount}% OFF
-                </div>
-              )}
-              <Image
-                src={selectedImage || product.imageUrls[0]}
-                alt={product.name}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover transition-opacity duration-300"
-                priority
-                data-ai-hint={product.dataAiHint || "art product detail"}
-              />
-            </div>
-            {product.imageUrls.length > 1 && (
-              <div className="flex gap-2 mt-4">
-                {product.imageUrls.map((imgUrl, index) => (
-                  <div
-                    key={index}
-                    onClick={() => setSelectedImage(imgUrl)}
-                    className={cn(
-                      "relative w-20 h-20 rounded-md overflow-hidden cursor-pointer border-2 transition-all",
-                      selectedImage === imgUrl
-                        ? "border-primary"
-                        : "border-transparent hover:border-muted-foreground",
-                    )}
-                  >
-                    <Image
-                      src={imgUrl}
-                      alt={`${product.name} thumbnail ${index + 1}`}
-                      fill
-                      sizes="80px"
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
+    <div className="space-y-16">
+      <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
+        {/* Image Gallery */}
+        <div className="space-y-4 sticky top-24">
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg shadow-lg">
+            {hasDiscount && (
+              <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-xs font-bold px-2.5 py-1 rounded-full z-10">
+                {product.discount}% OFF
               </div>
             )}
+            <Image
+              src={selectedImage || product.imageUrls[0]}
+              alt={product.name}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover transition-opacity duration-300"
+              priority
+              data-ai-hint={product.dataAiHint || "art product detail"}
+            />
           </div>
-          <div className="p-6 md:p-10 flex flex-col justify-center">
-            <CardHeader className="p-0 mb-4">
-              <CardTitle className="font-headline text-4xl lg:text-5xl mb-2">
-                {product.name}
-              </CardTitle>
+          {product.imageUrls.length > 1 && (
+            <div className="flex gap-2">
+              {product.imageUrls.map((imgUrl, index) => (
+                <div
+                  key={index}
+                  onClick={() => setSelectedImage(imgUrl)}
+                  className={cn(
+                    "relative w-20 h-20 rounded-md overflow-hidden cursor-pointer border-2 transition-all",
+                    selectedImage === imgUrl
+                      ? "border-primary"
+                      : "border-transparent hover:border-muted-foreground",
+                  )}
+                >
+                  <Image
+                    src={imgUrl}
+                    alt={`${product.name} thumbnail ${index + 1}`}
+                    fill
+                    sizes="80px"
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Product Info */}
+        <div className="space-y-6">
+          <div>
+            <h1 className="font-headline text-3xl lg:text-4xl font-bold">
+              {product.name}
+            </h1>
+            {product.artist && (
+              <p className="text-lg text-muted-foreground mt-1">
+                By{" "}
+                <Link href="#" className="text-primary hover:underline">
+                  {product.artist}
+                </Link>
+              </p>
+            )}
+          </div>
+
+          <p className="text-base leading-relaxed text-muted-foreground">
+            {product.description}
+          </p>
+
+          <Card>
+            <CardContent className="p-4 grid grid-cols-2 gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <PaletteIcon className="h-5 w-5 text-primary" />
+                <div>
+                  <span className="font-semibold text-foreground">
+                    Category
+                  </span>
+                  <p className="text-muted-foreground">{product.category}</p>
+                </div>
+              </div>
+              {product.medium && (
+                <div className="flex items-center gap-2">
+                  <PaletteIcon className="h-5 w-5 text-primary" />
+                  <div>
+                    <span className="font-semibold text-foreground">
+                      Medium
+                    </span>
+                    <p className="text-muted-foreground">{product.medium}</p>
+                  </div>
+                </div>
+              )}
+              {product.dimensions && (
+                <div className="flex items-center gap-2">
+                  <Ruler className="h-5 w-5 text-primary" />
+                  <div>
+                    <span className="font-semibold text-foreground">
+                      Dimensions
+                    </span>
+                    <p className="text-muted-foreground">
+                      {product.dimensions}
+                    </p>
+                  </div>
+                </div>
+              )}
               {product.artist && (
-                <p className="text-lg text-muted-foreground flex items-center">
-                  <User className="mr-2 h-5 w-5" /> By {product.artist}
+                <div className="flex items-center gap-2">
+                  <User className="h-5 w-5 text-primary" />
+                  <div>
+                    <span className="font-semibold text-foreground">
+                      Artist
+                    </span>
+                    <p className="text-muted-foreground">{product.artist}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Separator />
+
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-baseline gap-3">
+              <p className="text-3xl sm:text-4xl font-semibold text-primary">
+                ₹{discountedPrice.toLocaleString("en-IN")}
+              </p>
+              {hasDiscount && (
+                <p className="text-xl text-muted-foreground line-through">
+                  ₹{product.price.toLocaleString("en-IN")}
                 </p>
               )}
-            </CardHeader>
-            <CardContent className="p-0 space-y-4">
-              <CardDescription className="text-base leading-relaxed">
-                {product.description}
-              </CardDescription>
-              <Separator />
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="flex items-center">
-                  <PaletteIcon className="mr-2 h-5 w-5 text-primary" />
-                  <span>
-                    <strong>Category:</strong> {product.category}
-                  </span>
-                </div>
-                {product.medium && (
-                  <div className="flex items-center">
-                    <PaletteIcon className="mr-2 h-5 w-5 text-primary" />
-                    <span>
-                      <strong>Medium:</strong> {product.medium}
-                    </span>
-                  </div>
-                )}
-                {product.dimensions && (
-                  <div className="flex items-center">
-                    <Ruler className="mr-2 h-5 w-5 text-primary" />
-                    <span>
-                      <strong>Dimensions:</strong> {product.dimensions}
-                    </span>
-                  </div>
-                )}
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="flex items-baseline gap-3">
-                  <p className="text-3xl sm:text-4xl font-semibold text-primary">
-                    ₹{discountedPrice.toLocaleString("en-IN")}
-                  </p>
-                  {hasDiscount && (
-                    <p className="text-xl text-muted-foreground line-through">
-                      ₹{product.price.toLocaleString("en-IN")}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  size="lg"
-                  onClick={handleAddToCart}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-                </Button>
-              </div>
-            </CardContent>
+            </div>
+            <Button
+              size="lg"
+              onClick={handleAddToCart}
+              className="w-full sm:w-auto bg-primary hover:bg-primary/90"
+            >
+              <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+            </Button>
           </div>
         </div>
-      </Card>
+      </div>
+
+      {/* Related Products */}
+      {relatedProducts.length > 0 && (
+        <div>
+          <h2 className="font-headline text-3xl font-semibold mb-6">
+            Related Artwork
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {relatedProducts.map((relatedProduct) => (
+              <MinimalProductCard
+                key={relatedProduct.id}
+                product={relatedProduct}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

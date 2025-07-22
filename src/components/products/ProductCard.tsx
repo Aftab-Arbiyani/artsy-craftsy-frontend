@@ -37,15 +37,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
     : product.price;
 
   return (
-    <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
       <CardHeader className="p-0">
         <Link href={`/products/${product.id}`} className="block group">
-          <div className="relative w-full overflow-hidden">
+          <div className="relative w-full overflow-hidden aspect-[4/3]">
             <Image
               src={firstImageUrl}
               alt={product.name}
-              width={600}
-              height={400}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover w-full h-auto group-hover:scale-105 transition-transform duration-300"
               data-ai-hint={product.dataAiHint || "art product"}
             />
@@ -75,7 +75,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             {product.medium && <p>{product.medium}</p>}
           </div>
         </div>
-        <div className="flex justify-between items-center mt-4">
+        <div className="flex flex-row flex-wrap justify-between items-center gap-2 mt-4">
           <div className="flex flex-col items-start">
             <p className="font-semibold text-lg text-primary">
               ₹{discountedPrice.toLocaleString("en-IN")}
@@ -89,7 +89,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <div className="flex items-center gap-2">
             <Button
               onClick={handleAddToCart}
-              size="icon"
+              size="sm"
               className="bg-primary hover:bg-primary/90"
             >
               <ShoppingCart className="h-4 w-4" />
@@ -97,7 +97,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             <Link href={`/products/${product.id}`} passHref>
               <Button
                 variant="outline"
-                size="icon"
+                size="sm"
                 className="border-primary text-primary hover:bg-primary/10"
               >
                 <Eye className="h-4 w-4" />
