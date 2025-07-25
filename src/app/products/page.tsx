@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/accordion";
 
 const PRODUCTS_PER_PAGE = 12;
+const ARTISTS_PER_PAGE = 5;
 
 const orientationOptions = ["portrait", "landscape", "square", "circular"];
 
@@ -51,12 +52,16 @@ function ProductsPageComponent() {
   const [allCategories, setAllCategories] = useState<
     { id: string; name: string }[]
   >([]);
+  const [allArtists, setAllArtists] = useState<{ id: string; name: string }[]>(
+    [],
+  );
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedOrientations, setSelectedOrientations] = useState<string[]>(
     [],
   );
+  const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
   const [minPriceInput, setMinPriceInput] = useState("0");
   const [maxPriceInput, setMaxPriceInput] = useState("100000");
@@ -65,12 +70,20 @@ function ProductsPageComponent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
 
+  const [artistPagination, setArtistPagination] = useState({
+    skip: 0,
+    total: 0,
+    hasMore: true,
+  });
+  const [isLoadingMoreArtists, setIsLoadingMoreArtists] = useState(false);
+
   const fetchProducts = useCallback(
     async (filters: {
       page: number;
       search: string;
       categories: string[];
       orientations: string[];
+      artists: string[];
       price: [number, number];
     }) => {
       setIsLoading(true);
@@ -89,6 +102,10 @@ function ProductsPageComponent() {
 
         filters.orientations.forEach((orientation) => {
           params.append("orientation[]", orientation);
+        });
+
+        filters.artists.forEach((artistId) => {
+          params.append("artist_id[]", artistId);
         });
 
         params.set("price_from", String(filters.price[0]));
@@ -139,6 +156,7 @@ function ProductsPageComponent() {
     const initialSearch = searchParams.get("search") || "";
     const initialCategories = searchParams.getAll("category") || [];
     const initialOrientations = searchParams.getAll("orientation") || [];
+    const initialArtists = searchParams.getAll("artist") || [];
     const initialPage = Number(searchParams.get("page")) || 1;
     const initialMinPrice = Number(searchParams.get("price_from")) || 0;
     const initialMaxPrice = Number(searchParams.get("price_to")) || 100000;
@@ -150,6 +168,7 @@ function ProductsPageComponent() {
     setSearchTerm(initialSearch);
     setSelectedCategories(initialCategories);
     setSelectedOrientations(initialOrientations);
+    setSelectedArtists(initialArtists);
     setCurrentPage(initialPage);
     setPriceRange(initialPriceRange);
     setMinPriceInput(String(initialMinPrice));
@@ -160,31 +179,67 @@ function ProductsPageComponent() {
       search: initialSearch,
       categories: initialCategories,
       orientations: initialOrientations,
+      artists: initialArtists,
       price: initialPriceRange,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]); // Re-fetch only when URL params change
 
-  useEffect(() => {
-    const fetchCategories = async () => {
+  const fetchArtists = useCallback(
+    async (currentSkip: number) => {
+      setIsLoadingMoreArtists(true);
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/category/dropdown`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/artists-dropdown?take=${ARTISTS_PER_PAGE}&skip=${currentSkip}`,
         );
         const result = await response.json();
         if (response.ok && result.status === 1) {
-          setAllCategories(result.data);
+          setAllArtists((prev) =>
+            currentSkip === 0 ? result.data : [...prev, ...result.data],
+          );
+          const newTotal = result.total;
+          const newLoadedCount =
+            (currentSkip === 0 ? 0 : allArtists.length) + result.data.length;
+          setArtistPagination({
+            skip: newLoadedCount,
+            total: newTotal,
+            hasMore: newLoadedCount < newTotal,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch artists:", error);
+      } finally {
+        setIsLoadingMoreArtists(false);
+      }
+    },
+    [allArtists.length],
+  );
+
+  useEffect(() => {
+    const fetchInitialFilters = async () => {
+      // Fetch Categories
+      try {
+        const catResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/category/dropdown`,
+        );
+        const catResult = await catResponse.json();
+        if (catResponse.ok && catResult.status === 1) {
+          setAllCategories(catResult.data);
         }
       } catch (error) {
         console.error("Failed to fetch categories:", error);
       }
+      // Fetch initial artists
+      fetchArtists(0);
     };
-    fetchCategories();
+    fetchInitialFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getCategoryNameById = (id: string) => {
-    return allCategories.find((cat) => cat.id === id)?.name || id;
-  };
+  const getCategoryNameById = (id: string) =>
+    allCategories.find((cat) => cat.id === id)?.name || id;
+  const getArtistNameById = (id: string) =>
+    allArtists.find((artist) => artist.id === id)?.name || id;
 
   const handleOrientationChange = (orientation: string, checked: boolean) => {
     const newOrientations = checked
@@ -198,6 +253,7 @@ function ProductsPageComponent() {
       search: searchTerm,
       categories: selectedCategories,
       orientations: newOrientations,
+      artists: selectedArtists,
       price: priceRange,
     });
   };
@@ -214,6 +270,24 @@ function ProductsPageComponent() {
       search: searchTerm,
       categories: newCategories,
       orientations: selectedOrientations,
+      artists: selectedArtists,
+      price: priceRange,
+    });
+  };
+
+  const handleArtistChange = (artistId: string, checked: boolean) => {
+    const newArtists = checked
+      ? [...selectedArtists, artistId]
+      : selectedArtists.filter((id) => id !== artistId);
+
+    setSelectedArtists(newArtists);
+    setCurrentPage(1);
+    fetchProducts({
+      page: 1,
+      search: searchTerm,
+      categories: selectedCategories,
+      orientations: selectedOrientations,
+      artists: newArtists,
       price: priceRange,
     });
   };
@@ -230,7 +304,6 @@ function ProductsPageComponent() {
     const newMin = parseFloat(minPriceInput) || 0;
     const newMax = parseFloat(maxPriceInput) || 100000;
 
-    // Only call API if the price range has actually changed
     if (newMin === priceRange[0] && newMax === priceRange[1]) {
       return;
     }
@@ -243,6 +316,7 @@ function ProductsPageComponent() {
       search: searchTerm,
       categories: selectedCategories,
       orientations: selectedOrientations,
+      artists: selectedArtists,
       price: newPriceRange,
     });
   };
@@ -257,6 +331,7 @@ function ProductsPageComponent() {
       search: searchTerm,
       categories: selectedCategories,
       orientations: selectedOrientations,
+      artists: selectedArtists,
       price: values,
     });
   };
@@ -265,6 +340,7 @@ function ProductsPageComponent() {
     setSearchTerm("");
     setSelectedCategories([]);
     setSelectedOrientations([]);
+    setSelectedArtists([]);
     setPriceRange([0, 100000]);
     setMinPriceInput("0");
     setMaxPriceInput("100000");
@@ -274,18 +350,18 @@ function ProductsPageComponent() {
       search: "",
       categories: [],
       orientations: [],
+      artists: [],
       price: [0, 100000],
     });
     router.push("/products");
   };
 
-  const removeCategoryFilter = (catId: string) => {
+  const removeCategoryFilter = (catId: string) =>
     handleCategoryChange(catId, false);
-  };
-
-  const removeOrientationFilter = (orientation: string) => {
+  const removeOrientationFilter = (orientation: string) =>
     handleOrientationChange(orientation, false);
-  };
+  const removeArtistFilter = (artistId: string) =>
+    handleArtistChange(artistId, false);
 
   const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
 
@@ -300,9 +376,20 @@ function ProductsPageComponent() {
       value: o,
       label: o.charAt(0).toUpperCase() + o.slice(1),
     }));
-    return [...catFilters, ...orientFilters];
+    const artistFilters = selectedArtists.map((a) => ({
+      type: "artist",
+      value: a,
+      label: getArtistNameById(a),
+    }));
+    return [...catFilters, ...orientFilters, ...artistFilters];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategories, selectedOrientations, allCategories]);
+  }, [
+    selectedCategories,
+    selectedOrientations,
+    selectedArtists,
+    allCategories,
+    allArtists,
+  ]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
@@ -312,6 +399,7 @@ function ProductsPageComponent() {
       search: searchTerm,
       categories: selectedCategories,
       orientations: selectedOrientations,
+      artists: selectedArtists,
       price: priceRange,
     });
   };
@@ -359,6 +447,55 @@ function ProductsPageComponent() {
                   </div>
                 </AccordionContent>
               </AccordionItem>
+
+              <AccordionItem value="artist">
+                <AccordionTrigger className="text-base font-semibold py-2">
+                  Artist
+                </AccordionTrigger>
+                <AccordionContent className="pt-2">
+                  <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                    {allArtists.length === 0 && !isLoadingMoreArtists
+                      ? Array.from({ length: 4 }).map((_, i) => (
+                          <div key={i} className="flex items-center space-x-2">
+                            <Skeleton className="h-4 w-4" />
+                            <Skeleton className="h-4 w-3/4" />
+                          </div>
+                        ))
+                      : allArtists.map((artist) => (
+                          <div
+                            key={artist.id}
+                            className="flex items-center space-x-2"
+                          >
+                            <Checkbox
+                              id={`artist-${artist.id}`}
+                              checked={selectedArtists.includes(artist.id)}
+                              onCheckedChange={(checked) =>
+                                handleArtistChange(artist.id, !!checked)
+                              }
+                            />
+                            <label
+                              htmlFor={`artist-${artist.id}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {artist.name}
+                            </label>
+                          </div>
+                        ))}
+                    {artistPagination.hasMore && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        onClick={() => fetchArtists(artistPagination.skip)}
+                        disabled={isLoadingMoreArtists}
+                        className="p-0 h-auto mt-2"
+                      >
+                        {isLoadingMoreArtists ? "Loading..." : "Load more"}
+                      </Button>
+                    )}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
               <AccordionItem value="orientation">
                 <AccordionTrigger className="text-base font-semibold py-2">
                   Orientation
@@ -458,11 +595,14 @@ function ProductsPageComponent() {
                   key={`${filter.type}-${filter.value}`}
                   variant="secondary"
                   size="sm"
-                  onClick={() =>
-                    filter.type === "category"
-                      ? removeCategoryFilter(filter.value)
-                      : removeOrientationFilter(filter.value)
-                  }
+                  onClick={() => {
+                    if (filter.type === "category")
+                      removeCategoryFilter(filter.value);
+                    if (filter.type === "orientation")
+                      removeOrientationFilter(filter.value);
+                    if (filter.type === "artist")
+                      removeArtistFilter(filter.value);
+                  }}
                 >
                   {filter.label}
                   <X className="ml-2 h-4 w-4" />
@@ -480,9 +620,11 @@ function ProductsPageComponent() {
           )}
 
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+            <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
               {Array.from({ length: 9 }).map((_, index) => (
-                <ProductCardSkeleton key={index} />
+                <div key={index} className="break-inside-avoid">
+                  <ProductCardSkeleton />
+                </div>
               ))}
             </div>
           ) : products.length > 0 ? (
@@ -556,9 +698,11 @@ export default function ProductsPage() {
             <div className="flex justify-center">
               <Skeleton className="h-10 w-full max-w-md" />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+            <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
               {Array.from({ length: 9 }).map((_, index) => (
-                <ProductCardSkeleton key={index} />
+                <div key={index} className="break-inside-avoid">
+                  <ProductCardSkeleton />
+                </div>
               ))}
             </div>
           </main>
