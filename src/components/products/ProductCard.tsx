@@ -63,49 +63,47 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </div>
         </Link>
       </CardHeader>
-      <CardContent className="p-4 flex-grow flex flex-col">
-        <div className="flex-grow">
-          <Link href={`/products/${product.id}`} className="block">
-            <CardTitle
-              className="font-headline text-xl mb-1 truncate"
-              title={product.name}
-            >
-              {product.name}
-            </CardTitle>
-          </Link>
-          <p className="text-sm text-muted-foreground mb-2">
-            {product.artist ? `by ${product.artist}` : ""}
-          </p>
-          <div className="text-sm text-muted-foreground space-y-1">
-            <p>{product.category}</p>
-            {product.medium && <p>{product.medium}</p>}
-          </div>
+      <CardContent className="p-3 flex-grow">
+        <Link href={`/products/${product.id}`} className="block">
+          <CardTitle
+            className="font-headline text-base font-semibold mb-1 truncate"
+            title={product.name}
+          >
+            {product.name}
+          </CardTitle>
+        </Link>
+        <p className="text-xs text-muted-foreground mb-2 truncate">
+          {product.artist ? `by ${product.artist}` : ""}
+        </p>
+        <div className="text-xs text-muted-foreground space-y-0.5">
+          <p className="truncate">{product.category}</p>
+          {product.medium && <p className="truncate">{product.medium}</p>}
         </div>
       </CardContent>
-      <CardFooter className="p-4 pt-0 flex flex-wrap justify-between items-center gap-2">
+      <CardFooter className="p-3 pt-0 flex justify-between items-center gap-2">
         <div className="flex flex-col items-start">
-          <p className="font-semibold text-lg text-primary">
+          <p className="font-semibold text-base text-primary">
             ₹{discountedPrice.toLocaleString("en-IN")}
           </p>
           {hasDiscount && (
-            <p className="text-sm text-muted-foreground line-through">
+            <p className="text-xs text-muted-foreground line-through">
               ₹{product.price.toLocaleString("en-IN")}
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button
             onClick={handleAddToCart}
-            size="sm"
-            className="bg-primary hover:bg-primary/90"
+            size="icon"
+            className="bg-primary hover:bg-primary/90 h-8 w-8"
           >
             <ShoppingCart className="h-4 w-4" />
           </Button>
           <Link href={`/products/${product.id}`} passHref>
             <Button
               variant="outline"
-              size="sm"
-              className="border-primary text-primary hover:bg-primary/10"
+              size="icon"
+              className="border-primary text-primary hover:bg-primary/10 h-8 w-8"
             >
               <Eye className="h-4 w-4" />
             </Button>

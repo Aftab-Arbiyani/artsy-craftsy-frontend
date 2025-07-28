@@ -20,18 +20,10 @@ import {
   X,
 } from "lucide-react";
 import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Accordion,
   AccordionContent,
@@ -43,6 +35,7 @@ const PRODUCTS_PER_PAGE = 12;
 const ARTISTS_PER_PAGE = 5;
 
 const orientationOptions = ["portrait", "landscape", "square", "circular"];
+const DEFAULT_PRICE_RANGE: [number, number] = [0, 100000];
 
 function ProductsPageComponent() {
   const router = useRouter();
@@ -62,9 +55,15 @@ function ProductsPageComponent() {
     [],
   );
   const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
-  const [minPriceInput, setMinPriceInput] = useState("0");
-  const [maxPriceInput, setMaxPriceInput] = useState("100000");
+  const [priceRange, setPriceRange] =
+    useState<[number, number]>(DEFAULT_PRICE_RANGE);
+  const [isPriceFilterActive, setIsPriceFilterActive] = useState(false);
+  const [minPriceInput, setMinPriceInput] = useState(
+    String(DEFAULT_PRICE_RANGE[0]),
+  );
+  const [maxPriceInput, setMaxPriceInput] = useState(
+    String(DEFAULT_PRICE_RANGE[1]),
+  );
 
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,7 +83,7 @@ function ProductsPageComponent() {
       categories: string[];
       orientations: string[];
       artists: string[];
-      price: [number, number];
+      price?: [number, number];
     }) => {
       setIsLoading(true);
       try {
@@ -108,8 +107,10 @@ function ProductsPageComponent() {
           params.append("artist_id[]", artistId);
         });
 
-        params.set("price_from", String(filters.price[0]));
-        params.set("price_to", String(filters.price[1]));
+        if (filters.price) {
+          params.set("price_from", String(filters.price[0]));
+          params.set("price_to", String(filters.price[1]));
+        }
 
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products/all-products?${params.toString()}`,
@@ -158,21 +159,33 @@ function ProductsPageComponent() {
     const initialOrientations = searchParams.getAll("orientation") || [];
     const initialArtists = searchParams.getAll("artist") || [];
     const initialPage = Number(searchParams.get("page")) || 1;
-    const initialMinPrice = Number(searchParams.get("price_from")) || 0;
-    const initialMaxPrice = Number(searchParams.get("price_to")) || 100000;
-    const initialPriceRange: [number, number] = [
-      initialMinPrice,
-      initialMaxPrice,
-    ];
 
+    const initialMinPrice = searchParams.get("price_from");
+    const initialMaxPrice = searchParams.get("price_to");
+
+    let priceFilter: [number, number] | undefined = undefined;
+    let priceActive = false;
+
+    if (initialMinPrice !== null && initialMaxPrice !== null) {
+      const minPrice = Number(initialMinPrice);
+      const maxPrice = Number(initialMaxPrice);
+      priceFilter = [minPrice, maxPrice];
+      setPriceRange([minPrice, maxPrice]);
+      setMinPriceInput(String(minPrice));
+      setMaxPriceInput(String(maxPrice));
+      priceActive = true;
+    } else {
+      setPriceRange(DEFAULT_PRICE_RANGE);
+      setMinPriceInput(String(DEFAULT_PRICE_RANGE[0]));
+      setMaxPriceInput(String(DEFAULT_PRICE_RANGE[1]));
+    }
+
+    setIsPriceFilterActive(priceActive);
     setSearchTerm(initialSearch);
     setSelectedCategories(initialCategories);
     setSelectedOrientations(initialOrientations);
     setSelectedArtists(initialArtists);
     setCurrentPage(initialPage);
-    setPriceRange(initialPriceRange);
-    setMinPriceInput(String(initialMinPrice));
-    setMaxPriceInput(String(initialMaxPrice));
 
     fetchProducts({
       page: initialPage,
@@ -180,10 +193,10 @@ function ProductsPageComponent() {
       categories: initialCategories,
       orientations: initialOrientations,
       artists: initialArtists,
-      price: initialPriceRange,
+      price: priceActive ? priceFilter : undefined,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]); // Re-fetch only when URL params change
+  }, [searchParams]);
 
   const fetchArtists = useCallback(
     async (currentSkip: number) => {
@@ -254,7 +267,7 @@ function ProductsPageComponent() {
       categories: selectedCategories,
       orientations: newOrientations,
       artists: selectedArtists,
-      price: priceRange,
+      price: isPriceFilterActive ? priceRange : undefined,
     });
   };
 
@@ -271,7 +284,7 @@ function ProductsPageComponent() {
       categories: newCategories,
       orientations: selectedOrientations,
       artists: selectedArtists,
-      price: priceRange,
+      price: isPriceFilterActive ? priceRange : undefined,
     });
   };
 
@@ -288,7 +301,7 @@ function ProductsPageComponent() {
       categories: selectedCategories,
       orientations: selectedOrientations,
       artists: newArtists,
-      price: priceRange,
+      price: isPriceFilterActive ? priceRange : undefined,
     });
   };
 
@@ -304,12 +317,17 @@ function ProductsPageComponent() {
     const newMin = parseFloat(minPriceInput) || 0;
     const newMax = parseFloat(maxPriceInput) || 100000;
 
-    if (newMin === priceRange[0] && newMax === priceRange[1]) {
+    if (
+      isPriceFilterActive &&
+      newMin === priceRange[0] &&
+      newMax === priceRange[1]
+    ) {
       return;
     }
 
     const newPriceRange: [number, number] = [newMin, newMax];
     setPriceRange(newPriceRange);
+    setIsPriceFilterActive(true);
     setCurrentPage(1);
     fetchProducts({
       page: 1,
@@ -325,6 +343,7 @@ function ProductsPageComponent() {
     setMinPriceInput(String(values[0]));
     setMaxPriceInput(String(values[1]));
     setPriceRange(values);
+    setIsPriceFilterActive(true);
     setCurrentPage(1);
     fetchProducts({
       page: 1,
@@ -341,9 +360,10 @@ function ProductsPageComponent() {
     setSelectedCategories([]);
     setSelectedOrientations([]);
     setSelectedArtists([]);
-    setPriceRange([0, 100000]);
-    setMinPriceInput("0");
-    setMaxPriceInput("100000");
+    setPriceRange(DEFAULT_PRICE_RANGE);
+    setMinPriceInput(String(DEFAULT_PRICE_RANGE[0]));
+    setMaxPriceInput(String(DEFAULT_PRICE_RANGE[1]));
+    setIsPriceFilterActive(false);
     setCurrentPage(1);
     fetchProducts({
       page: 1,
@@ -351,7 +371,7 @@ function ProductsPageComponent() {
       categories: [],
       orientations: [],
       artists: [],
-      price: [0, 100000],
+      price: undefined,
     });
     router.push("/products");
   };
@@ -400,7 +420,7 @@ function ProductsPageComponent() {
       categories: selectedCategories,
       orientations: selectedOrientations,
       artists: selectedArtists,
-      price: priceRange,
+      price: isPriceFilterActive ? priceRange : undefined,
     });
   };
 
@@ -416,7 +436,7 @@ function ProductsPageComponent() {
                   Category
                 </AccordionTrigger>
                 <AccordionContent className="pt-2">
-                  <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                  <div className="space-y-2 pr-2">
                     {allCategories.length === 0
                       ? Array.from({ length: 4 }).map((_, i) => (
                           <div key={i} className="flex items-center space-x-2">
@@ -453,7 +473,7 @@ function ProductsPageComponent() {
                   Artist
                 </AccordionTrigger>
                 <AccordionContent className="pt-2">
-                  <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                  <div className="space-y-2 pr-2">
                     {allArtists.length === 0 && !isLoadingMoreArtists
                       ? Array.from({ length: 4 }).map((_, i) => (
                           <div key={i} className="flex items-center space-x-2">
@@ -620,7 +640,7 @@ function ProductsPageComponent() {
           )}
 
           {isLoading ? (
-            <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+            <div className="columns-2 sm:columns-2 lg:columns-3 gap-6 space-y-6">
               {Array.from({ length: 9 }).map((_, index) => (
                 <div key={index} className="break-inside-avoid">
                   <ProductCardSkeleton />
@@ -629,7 +649,7 @@ function ProductsPageComponent() {
             </div>
           ) : products.length > 0 ? (
             <>
-              <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+              <div className="columns-2 sm:columns-2 lg:columns-3 gap-6 space-y-6">
                 {products.map((product) => (
                   <div key={product.id} className="break-inside-avoid">
                     <ProductCard product={product} />
@@ -682,9 +702,6 @@ export default function ProductsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
           <aside className="lg:col-span-1 lg:sticky top-24">
             <Card className="p-4">
-              <CardHeader className="p-2 pt-0">
-                <Skeleton className="h-8 w-1/2" />
-              </CardHeader>
               <CardContent className="p-0">
                 <div className="space-y-4">
                   <Skeleton className="h-10 w-full" />
