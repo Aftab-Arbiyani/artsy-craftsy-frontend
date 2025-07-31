@@ -224,7 +224,7 @@ export default function Home() {
         <h2 className="font-headline text-4xl font-semibold mb-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
           Featured Artwork
         </h2>
-        <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
+        <div className="columns-2 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
           {isLoadingFeatured
             ? Array.from({ length: 8 }).map((_, index) => (
                 <div

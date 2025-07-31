@@ -144,7 +144,7 @@ export default function ProductDetailsPage() {
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
         {/* Image Gallery */}
         <div className="space-y-4 sticky top-24">
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg shadow-lg">
+          <div className="relative w-full overflow-hidden rounded-lg shadow-lg">
             {hasDiscount && (
               <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-xs font-bold px-2.5 py-1 rounded-full z-10">
                 {product.discount}% OFF
