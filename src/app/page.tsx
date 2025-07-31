@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/products/ProductCard";
 import type { Product } from "@/lib/types";
 import Image from "next/image";
-import { Palette, Lightbulb, Users, PlusSquare } from "lucide-react";
+import { Palette, Lightbulb, Users, PlusSquare, Loader2 } from "lucide-react";
 import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 import { useState, useEffect } from "react";
 import type { Category } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
@@ -17,6 +18,8 @@ export default function Home() {
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [userType, setUserType] = useState<string | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const userDataString = localStorage.getItem("user");
@@ -108,12 +111,22 @@ export default function Home() {
     fetchCategories();
   }, []);
 
+  const handleViewAllClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setIsNavigating(true);
+    router.push("/products");
+  };
+
   return (
     <div className="space-y-16">
       {/* Hero Section */}
       <section className="relative h-[500px] w-full flex items-center justify-center rounded-lg overflow-hidden shadow-lg">
         <Image
-          src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}public/images/hero-section.png`}
+          src={
+            process.env.NEXT_PUBLIC_IMAGE_BASE_URL
+              ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}public/images/hero-section.png`
+              : "https://placehold.co/1200x500.png"
+          }
           alt="Artistic background"
           fill
           className="object-cover"
@@ -244,9 +257,16 @@ export default function Home() {
               ))}
         </div>
         <div className="text-center mt-12">
-          <Link href="/products" passHref>
-            <Button variant="secondary" size="lg">
-              View All Products
+          <Link href="/products" passHref onClick={handleViewAllClick}>
+            <Button variant="secondary" size="lg" disabled={isNavigating}>
+              {isNavigating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                "View All Products"
+              )}
             </Button>
           </Link>
         </div>
@@ -293,7 +313,11 @@ export default function Home() {
       {/* Custom Art / Artist CTA */}
       <section className="relative h-80 w-full rounded-lg overflow-hidden shadow-lg">
         <Image
-          src="http://localhost:3000/public/images/banner.png"
+          src={
+            process.env.NEXT_PUBLIC_IMAGE_BASE_URL
+              ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}public/images/banner.png`
+              : "https://placehold.co/1200x320.png"
+          }
           alt="Artistic background banner"
           fill
           className="object-cover"

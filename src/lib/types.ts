@@ -10,10 +10,12 @@ export type Product = {
   medium?: string;
   dataAiHint?: string;
   discount?: number;
+  year?: string;
+  stock?: number;
 };
 
 export type CartItem = {
-  product: Product;
+  product: Product & { price: number }; // Ensure product in cart always has a price
   quantity: number;
 };
 

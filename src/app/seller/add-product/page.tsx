@@ -72,7 +72,7 @@ export default function AddProductPage() {
 
   const handleSuccess = () => {
     // Redirect to dashboard or products page after successful submission
-    router.push("/dashboard");
+    router.push("/seller/my-artworks");
   };
 
   if (isFetchingCategories) {
@@ -87,7 +87,7 @@ export default function AddProductPage() {
   return (
     <div className="container mx-auto max-w-6xl py-8">
       <div className="flex items-center gap-4 mb-8">
-        <Link href="/dashboard" passHref>
+        <Link href="/seller/my-artworks" passHref>
           <Button variant="outline" size="icon">
             <ArrowLeft className="h-4 w-4" />
           </Button>
