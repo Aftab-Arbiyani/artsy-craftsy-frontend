@@ -70,7 +70,7 @@ export default function ProductDetailsPage() {
           const apiProduct = productResult.data;
           const imageUrls = apiProduct.media?.map((m: any) =>
             m.file_path
-              ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/${m.file_path}`
+              ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${m.file_path}`
               : "https://placehold.co/600x400.png",
           ) || ["https://placehold.co/600x400.png"];
 
@@ -109,10 +109,12 @@ export default function ProductDetailsPage() {
                 id: item.id,
                 name: item.title,
                 description: item.description || "",
-                price: item.listing_price ? parseFloat(item.listing_price) : 0,
+                price: item.listing_price
+                  ? parseFloat(item.listing_price)
+                  : undefined,
                 imageUrls: item.media?.map((m: any) =>
                   m.file_path
-                    ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/${m.file_path}`
+                    ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${m.file_path}`
                     : "https://placehold.co/600x400.png",
                 ) || ["https://placehold.co/600x400.png"],
                 artist: item.user?.name || "Unknown Artist",

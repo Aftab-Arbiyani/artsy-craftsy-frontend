@@ -2,7 +2,7 @@ export type Product = {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price?: number;
   category: string; // Allow any string for category name
   imageUrls: string[];
   artist?: string;

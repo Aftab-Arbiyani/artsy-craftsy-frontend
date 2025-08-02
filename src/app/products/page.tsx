@@ -136,7 +136,7 @@ function ProductsPageComponent() {
               category: item.category?.name || "Uncategorized",
               imageUrls: item.media?.map((m: any) =>
                 m.file_path
-                  ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/${m.file_path}`
+                  ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${m.file_path}`
                   : "https://placehold.co/600x400.png",
               ) || ["https://placehold.co/600x400.png"],
               artist: item.user?.name || "Unknown Artist",

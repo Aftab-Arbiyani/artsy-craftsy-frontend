@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Loader2, Upload, Info, RotateCcw, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import Image from "next/image";
 import {
   Select,
   SelectContent,
@@ -312,10 +313,8 @@ export default function ArtworkUploadForm({
 
       reset(newValues as any);
 
-      calculateAmounts(listingPrice, hasDiscount, discountPercentage);
-
       if (artwork.media && artwork.media.length > 0) {
-        const fullMainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${artwork.media[0].file_path}`;
+        const fullMainUrl = `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${artwork.media[0].file_path}`;
         setMainImagePreview(fullMainUrl);
         setMainImageUrl(artwork.media[0].file_path);
 
@@ -323,7 +322,7 @@ export default function ArtworkUploadForm({
           .slice(1)
           .map(
             (m: any) =>
-              `${process.env.NEXT_PUBLIC_API_BASE_URL}/${m.file_path}`,
+              `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${m.file_path}`,
           );
         const additionalUrls = artwork.media
           .slice(1)
@@ -343,6 +342,16 @@ export default function ArtworkUploadForm({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [artwork, reset]);
+
+  useEffect(() => {
+    if (artwork) {
+      const listingPrice = parseFloat(artwork.listing_price);
+      const discountPercentage = parseFloat(artwork.discount);
+      const hasDiscount = discountPercentage > 0;
+      calculateAmounts(listingPrice, hasDiscount, discountPercentage);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [artwork]);
 
   const handleResetForm = () => {
     reset(formDefaultValues);
@@ -409,7 +418,7 @@ export default function ArtworkUploadForm({
   const handleMainFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setMainImagePreview(`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${file} `);
+      setMainImagePreview(URL.createObjectURL(file));
       setIsUploadingMain(true);
       const uploadedImageUrl = await uploadImage(file);
       if (uploadedImageUrl) {
@@ -428,7 +437,7 @@ export default function ArtworkUploadForm({
     const file = e.target.files?.[0];
     if (file) {
       const newPreviews = [...multiShotPreviews];
-      newPreviews[index] = `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}/${file}`;
+      newPreviews[index] = URL.createObjectURL(file);
       setMultiShotPreviews(newPreviews);
 
       const newUploadingStatus = [...isUploadingMulti];
@@ -503,7 +512,14 @@ export default function ArtworkUploadForm({
         }
       }
     };
-    fetchMaterials();
+
+    if (isInitialRender.current && artwork && artwork.category) {
+      isInitialRender.current = false;
+    }
+
+    if (watchedCategory) {
+      fetchMaterials();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedCategory, setValue, toast]);
 
@@ -588,7 +604,7 @@ export default function ArtworkUploadForm({
 
     const isEditing = !!artwork;
     const url = isEditing
-      ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products/${artwork.id} `
+      ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products/${artwork.id}`
       : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products`;
 
     const method = isEditing ? "PATCH" : "POST";
@@ -598,7 +614,7 @@ export default function ArtworkUploadForm({
         method: method,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token} `,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
@@ -607,7 +623,7 @@ export default function ArtworkUploadForm({
 
       if (response.ok && result.status === 1) {
         toast({
-          title: `Artwork ${isEditing ? "Updated" : "Saved"} !`,
+          title: `Artwork ${isEditing ? "Updated" : "Saved"}!`,
           description: `Your artwork has been successfully ${isEditing ? "updated" : "submitted"}.`,
           variant: "success",
         });
@@ -657,11 +673,14 @@ export default function ArtworkUploadForm({
                 }
               >
                 {mainImagePreview ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={mainImagePreview}
                     alt="Main artwork preview"
+                    fill
                     className="absolute inset-0 w-full h-full object-contain p-2"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    quality={90}
+                    priority
                   />
                 ) : (
                   <>
@@ -716,7 +735,7 @@ export default function ArtworkUploadForm({
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={preview}
-                            alt={`Multi - shot preview ${index + 1} `}
+                            alt={`Multi-shot preview ${index + 1}`}
                             className="absolute inset-0 w-full h-full object-cover rounded-lg"
                           />
                         ) : (

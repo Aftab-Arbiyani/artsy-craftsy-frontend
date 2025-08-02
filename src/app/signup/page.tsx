@@ -184,9 +184,8 @@ function SignupFormComponent() {
       <div className="w-full lg:grid lg:max-w-4xl lg:grid-cols-2 border rounded-lg overflow-hidden shadow-lg">
         <div
           className="relative hidden flex-col items-center justify-center bg-black p-10 text-white dark:border-r lg:flex"
-          style={{ height: "700px" }}
+          style={{ height: accountTypeParam === "artist" ? "800px" : "700px" }}
         >
-          {" "}
           {/* Adjust this height as needed */}
           <div className="absolute inset-0 overflow-hidden">
             <Image

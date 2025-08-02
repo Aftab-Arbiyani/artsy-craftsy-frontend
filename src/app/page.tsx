@@ -57,7 +57,7 @@ export default function Home() {
               category: item.category?.name || "Uncategorized",
               imageUrls: item.media?.map((m: any) =>
                 m.file_path
-                  ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/${m.file_path}`
+                  ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${m.file_path}`
                   : "https://placehold.co/600x400.png",
               ) || ["https://placehold.co/600x400.png"],
               artist: item.user?.name || "Unknown Artist",
@@ -93,7 +93,7 @@ export default function Home() {
             result.data.map((cat: any) => ({
               ...cat,
               image: cat.image
-                ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/${cat.image}`
+                ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${cat.image}`
                 : `https://placehold.co/400x400.png`,
             })),
           );
@@ -122,11 +122,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative h-[500px] w-full flex items-center justify-center rounded-lg overflow-hidden shadow-lg">
         <Image
-          src={
-            process.env.NEXT_PUBLIC_IMAGE_BASE_URL
-              ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}public/images/hero-section.png`
-              : "https://placehold.co/1200x500.png"
-          }
+          src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || ""}public/images/hero-section.png`}
           alt="Artistic background"
           fill
           className="object-cover"
@@ -313,11 +309,7 @@ export default function Home() {
       {/* Custom Art / Artist CTA */}
       <section className="relative h-80 w-full rounded-lg overflow-hidden shadow-lg">
         <Image
-          src={
-            process.env.NEXT_PUBLIC_IMAGE_BASE_URL
-              ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}public/images/banner.png`
-              : "https://placehold.co/1200x320.png"
-          }
+          src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || ""}public/images/banner.png`}
           alt="Artistic background banner"
           fill
           className="object-cover"

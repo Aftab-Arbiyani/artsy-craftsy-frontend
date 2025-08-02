@@ -18,7 +18,6 @@ import {
   Trash2,
   ArrowLeft,
   Image as ImageIcon,
-  Loader2,
   ChevronLeft,
   ChevronRight,
   Eye,
