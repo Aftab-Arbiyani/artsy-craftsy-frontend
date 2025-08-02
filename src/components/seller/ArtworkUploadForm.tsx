@@ -191,7 +191,11 @@ export default function ArtworkUploadForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+
+  const [initialArtworkData, setInitialArtworkData] = useState<any>(null);
+  const [deletedImages, setDeletedImages] = useState<string[]>([]);
   const isInitialRender = useRef(true);
+  const [isArtworkDataLoaded, setIsArtworkDataLoaded] = useState(false);
 
   const dynamicArtworkSchema = artworkSchema.refine(
     (data) => {
@@ -206,34 +210,69 @@ export default function ArtworkUploadForm({
     },
   );
 
-  const formDefaultValues: ArtworkFormValues = {
-    title: "",
-    description: "",
-    year: "",
-    width: 0,
-    height: 0,
-    depth: 0,
-    weight: 0,
-    quantity: 1,
-    sellOptions: "original_only",
-    deliveryAs: "rolled",
-    hsnCode: "970711090",
-    tax: 12,
-    listingPrice: undefined,
-    hasDiscount: false,
-    discountPercentage: 0,
-    discountedPrice: undefined,
-    amountReceivable: undefined,
-    isCopyrightOwner: false,
-    status: "active",
-    orientation: "",
-    category: "",
+  const getDefaultValues = (): ArtworkFormValues => {
+    if (artwork) {
+      const listingPrice = parseFloat(artwork.listing_price);
+      const discountPercentage = parseFloat(artwork.discount);
+      const hasDiscount = discountPercentage > 0;
+
+      return {
+        title: artwork.title || "",
+        description: artwork.description || "",
+        year: artwork.year_of_artwork?.toString() || "",
+        width: artwork.width || 0,
+        height: artwork.height || 0,
+        depth: artwork.depth || 0,
+        weight: artwork.weight || 0,
+        quantity: artwork.quantity || 1,
+        sellOptions: artwork.sell_options || "original_only",
+        deliveryAs: artwork.delivery_as || "rolled",
+        hsnCode: "970711090",
+        tax: 12,
+        listingPrice: isNaN(listingPrice) ? undefined : listingPrice,
+        hasDiscount: hasDiscount,
+        discountPercentage: discountPercentage || 0,
+        discountedPrice: undefined,
+        amountReceivable: undefined,
+        isCopyrightOwner: artwork.is_copyright_owner || false,
+        status: artwork.status || "active",
+        orientation: artwork.orientation || "",
+        category: artwork.category?.id || "",
+        medium: artwork.materials?.id || undefined,
+      };
+    }
+
+    // Default values for new artwork
+    return {
+      title: "",
+      description: "",
+      year: "",
+      width: 0,
+      height: 0,
+      depth: 0,
+      weight: 0,
+      quantity: 1,
+      sellOptions: "original_only",
+      deliveryAs: "rolled",
+      hsnCode: "970711090",
+      tax: 12,
+      listingPrice: undefined,
+      hasDiscount: false,
+      discountPercentage: 0,
+      discountedPrice: undefined,
+      amountReceivable: undefined,
+      isCopyrightOwner: false,
+      status: "active",
+      orientation: "",
+      category: "",
+      medium: undefined,
+    };
   };
 
   const artworkForm = useForm<ArtworkFormValues>({
     resolver: zodResolver(dynamicArtworkSchema),
     context: { materials },
-    defaultValues: formDefaultValues,
+    defaultValues: getDefaultValues(),
   });
 
   const {
@@ -288,60 +327,39 @@ export default function ArtworkUploadForm({
 
   useEffect(() => {
     if (artwork) {
-      const listingPrice = parseFloat(artwork.listing_price);
-      const discountPercentage = parseFloat(artwork.discount);
-      const hasDiscount = discountPercentage > 0;
+      setInitialArtworkData(artwork);
+      setIsArtworkDataLoaded(true);
 
-      const newValues = {
-        title: artwork.title || "",
-        description: artwork.description || "",
-        orientation: artwork.orientation || "",
-        year: artwork.year_of_artwork?.toString() || "",
-        category: artwork.category?.id || "",
-        medium: artwork.materials?.id || undefined,
-        width: artwork.width || undefined,
-        height: artwork.height || undefined,
-        depth: artwork.depth || undefined,
-        weight: artwork.weight || undefined,
-        quantity: artwork.quantity || 1,
-        listingPrice: isNaN(listingPrice) ? undefined : listingPrice,
-        hasDiscount: hasDiscount,
-        discountPercentage: discountPercentage || 0,
-        status: artwork.status || "active",
-        isCopyrightOwner: artwork.is_copyright_owner || false,
-      };
-
-      reset(newValues as any);
-
+      // Handle image previews
       if (artwork.media && artwork.media.length > 0) {
-        const fullMainUrl = `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${artwork.media[0].file_path}`;
-        setMainImagePreview(fullMainUrl);
-        setMainImageUrl(artwork.media[0].file_path);
+        const mainImage = artwork.media.find(
+          (m: any, index: number) => index === 0,
+        );
+        if (mainImage) {
+          const fullMainUrl = `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${mainImage.file_path}`;
+          setMainImagePreview(fullMainUrl);
+          setMainImageUrl(mainImage.file_path);
+        }
 
-        const additionalPreviews = artwork.media
-          .slice(1)
-          .map(
-            (m: any) =>
-              `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${m.file_path}`,
-          );
-        const additionalUrls = artwork.media
-          .slice(1)
-          .map((m: any) => m.file_path);
-
+        const additionalMedia = artwork.media.slice(1);
         const newPreviews = [...multiShotPreviews];
         const newUrls = [...multiShotUrls];
 
         for (let i = 0; i < 4; i++) {
-          newPreviews[i] = additionalPreviews[i] || null;
-          newUrls[i] = additionalUrls[i] || null;
+          newPreviews[i] = additionalMedia[i]
+            ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${additionalMedia[i].file_path}`
+            : null;
+          newUrls[i] = additionalMedia[i] ? additionalMedia[i].file_path : null;
         }
 
         setMultiShotPreviews(newPreviews);
         setMultiShotUrls(newUrls);
       }
+    } else {
+      setIsArtworkDataLoaded(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [artwork, reset]);
+  }, [artwork]);
 
   useEffect(() => {
     if (artwork) {
@@ -354,11 +372,38 @@ export default function ArtworkUploadForm({
   }, [artwork]);
 
   const handleResetForm = () => {
-    reset(formDefaultValues);
+    const defaultValues: ArtworkFormValues = {
+      title: "",
+      description: "",
+      year: "",
+      width: 0,
+      height: 0,
+      depth: 0,
+      weight: 0,
+      quantity: 1,
+      sellOptions: "original_only",
+      deliveryAs: "rolled",
+      hsnCode: "970711090",
+      tax: 12,
+      listingPrice: undefined,
+      hasDiscount: false,
+      discountPercentage: 0,
+      discountedPrice: undefined,
+      amountReceivable: undefined,
+      isCopyrightOwner: false,
+      status: "active",
+      orientation: "",
+      category: "",
+      medium: undefined,
+    };
+
+    reset(defaultValues);
     setMainImagePreview(null);
     setMainImageUrl(null);
     setMultiShotPreviews([null, null, null, null]);
     setMultiShotUrls([null, null, null, null]);
+    setDeletedImages([]);
+    setIsArtworkDataLoaded(false);
     if (mainImageInputRef.current) mainImageInputRef.current.value = "";
     multiShotInputRefs.forEach((ref) => {
       if (ref.current) ref.current.value = "";
@@ -460,6 +505,41 @@ export default function ArtworkUploadForm({
     }
   };
 
+  const handleRemoveMainImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (mainImageUrl) {
+      // Only track for deletion if it's an existing image (has initialArtworkData)
+      if (initialArtworkData?.media?.some((m: any) => m.file_path === mainImageUrl)) {
+        setDeletedImages((prev) => [...prev, mainImageUrl]);
+      }
+    }
+    setMainImagePreview(null);
+    setMainImageUrl(null);
+    if (mainImageInputRef.current) mainImageInputRef.current.value = "";
+  };
+
+  const handleRemoveMultiShot = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
+    const urlToRemove = multiShotUrls[index];
+    if (urlToRemove) {
+      // Only track for deletion if it's an existing image (has initialArtworkData)
+      if (initialArtworkData?.media?.some((m: any) => m.file_path === urlToRemove)) {
+        setDeletedImages((prev) => [...prev, urlToRemove]);
+      }
+    }
+
+    const newPreviews = [...multiShotPreviews];
+    newPreviews[index] = null;
+    setMultiShotPreviews(newPreviews);
+
+    const newUrls = [...multiShotUrls];
+    newUrls[index] = null;
+    setMultiShotUrls(newUrls);
+
+    if (multiShotInputRefs[index].current)
+      multiShotInputRefs[index].current.value = "";
+  };
+
   useEffect(() => {
     const fetchMaterials = async () => {
       if (!watchedCategory) {
@@ -468,7 +548,9 @@ export default function ArtworkUploadForm({
       }
 
       setIsFetchingMaterials(true);
-      if (!isInitialRender.current || !artwork) {
+
+      // Only clear medium if it's a new artwork and user is changing category
+      if (!artwork && isInitialRender.current === false) {
         setValue("medium", undefined);
       }
 
@@ -513,15 +595,22 @@ export default function ArtworkUploadForm({
       }
     };
 
-    if (isInitialRender.current && artwork && artwork.category) {
-      isInitialRender.current = false;
-    }
-
-    if (watchedCategory) {
+    if (watchedCategory && isArtworkDataLoaded) {
       fetchMaterials();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [watchedCategory, setValue, toast]);
+  }, [watchedCategory, isArtworkDataLoaded]);
+
+  // Separate effect to ensure medium is set correctly after materials are loaded
+  useEffect(() => {
+    if (artwork && artwork.materials?.id && materials.length > 0 && isArtworkDataLoaded) {
+      const currentMedium = watch("medium");
+      // Only set if the current medium is different from what it should be
+      if (currentMedium !== artwork.materials.id) {
+        setValue("medium", artwork.materials.id);
+      }
+    }
+  }, [materials, artwork, isArtworkDataLoaded, setValue, watch]);
 
   useEffect(() => {
     calculateAmounts(
@@ -565,46 +654,161 @@ export default function ArtworkUploadForm({
       return;
     }
 
-    const allImages = [mainImageUrl, ...multiShotUrls].filter(
-      (url): url is string => url !== null,
-    );
-    if (allImages.length === 0) {
-      toast({
-        title: "Image Required",
-        description: "Please upload at least one image for the artwork.",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-      return;
-    }
-
-    const payload: any = {
-      title: data.title,
-      description: data.description,
-      orientation: data.orientation,
-      year_of_artwork: data.year,
-      quantity: data.quantity,
-      height: data.height,
-      width: data.width,
-      depth: data.depth,
-      weight: data.weight,
-      tax: data.tax,
-      listing_price: data.listingPrice,
-      discount: data.hasDiscount ? data.discountPercentage : 0,
-      amount_receivable: data.amountReceivable,
-      is_copyright_owner: data.isCopyrightOwner,
-      category: data.category,
-      images: allImages,
-      status: data.status,
-    };
-
-    if (materials.length > 0 && data.medium) {
-      payload.materials = data.medium;
-    }
-
     const isEditing = !!artwork;
+    let payload: any = {};
+
+    const newImages = [mainImageUrl, ...multiShotUrls].filter(
+      (url): url is string => {
+        if (!url) return false;
+        // Check if the URL is not part of the initial artwork media
+        const isExisting = initialArtworkData?.media?.some(
+          (m: any) => m.file_path === url,
+        );
+        return !isExisting;
+      },
+    );
+
+    if (isEditing) {
+      // Construct differential payload
+      const initialFormValues = {
+        title: initialArtworkData.title || "",
+        description: initialArtworkData.description || "",
+        orientation: initialArtworkData.orientation || "",
+        year: initialArtworkData.year_of_artwork?.toString() || "",
+        category: initialArtworkData.category?.id || "",
+        medium: initialArtworkData.materials?.id || undefined,
+        width: initialArtworkData.width,
+        height: initialArtworkData.height,
+        depth: initialArtworkData.depth,
+        weight: initialArtworkData.weight,
+        quantity: initialArtworkData.quantity,
+        sellOptions: initialArtworkData.sell_options || "original_only",
+        deliveryAs: initialArtworkData.delivery_as || "rolled",
+        listingPrice: parseFloat(initialArtworkData.listing_price),
+        discount: parseFloat(initialArtworkData.discount),
+        status: initialArtworkData.status || "active",
+        isCopyrightOwner: initialArtworkData.is_copyright_owner,
+      };
+
+      const currentFormValues = getValues();
+
+      if (currentFormValues.title !== initialFormValues.title)
+        payload.title = currentFormValues.title;
+      if (currentFormValues.description !== initialFormValues.description)
+        payload.description = currentFormValues.description;
+      if (currentFormValues.orientation !== initialFormValues.orientation)
+        payload.orientation = currentFormValues.orientation;
+      if (String(currentFormValues.year) !== initialFormValues.year)
+        payload.year_of_artwork = currentFormValues.year;
+      if (currentFormValues.category !== initialFormValues.category)
+        payload.category = currentFormValues.category;
+      if (currentFormValues.medium !== initialFormValues.medium)
+        payload.materials = currentFormValues.medium;
+      if (currentFormValues.width !== initialFormValues.width)
+        payload.width = currentFormValues.width;
+      if (currentFormValues.height !== initialFormValues.height)
+        payload.height = currentFormValues.height;
+      if (currentFormValues.depth !== initialFormValues.depth)
+        payload.depth = currentFormValues.depth;
+      if (currentFormValues.weight !== initialFormValues.weight)
+        payload.weight = currentFormValues.weight;
+      if (currentFormValues.quantity !== initialFormValues.quantity)
+        payload.quantity = currentFormValues.quantity;
+      if (currentFormValues.sellOptions !== initialFormValues.sellOptions)
+        payload.sell_options = currentFormValues.sellOptions;
+      if (currentFormValues.deliveryAs !== initialFormValues.deliveryAs)
+        payload.delivery_as = currentFormValues.deliveryAs;
+      if (currentFormValues.listingPrice !== initialFormValues.listingPrice)
+        payload.listing_price = currentFormValues.listingPrice;
+
+      const currentDiscount = currentFormValues.hasDiscount
+        ? currentFormValues.discountPercentage
+        : 0;
+      if (currentDiscount !== initialFormValues.discount)
+        payload.discount = currentDiscount;
+      if (
+        currentDiscount !== initialFormValues.discount &&
+        currentFormValues.amountReceivable
+      )
+        payload.amount_receivable = currentFormValues.amountReceivable;
+
+      if (currentFormValues.status !== initialFormValues.status)
+        payload.status = currentFormValues.status;
+      if (
+        currentFormValues.isCopyrightOwner !==
+        initialFormValues.isCopyrightOwner
+      )
+        payload.is_copyright_owner = currentFormValues.isCopyrightOwner;
+
+      if (newImages.length > 0) {
+        payload.images = newImages;
+      }
+      if (deletedImages.length > 0) {
+        payload.deleted_images = deletedImages;
+      }
+
+      // Debug logging to help identify the issue
+      console.log("Edit payload debug:", {
+        deletedImages,
+        newImages,
+        mainImageUrl,
+        multiShotUrls,
+        initialArtworkMedia: initialArtworkData?.media,
+        payloadKeys: Object.keys(payload)
+      });
+
+      if (Object.keys(payload).length === 0) {
+        toast({
+          title: "No Changes Detected",
+          description: "You haven't made any changes to the artwork.",
+          variant: "default",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+    } else {
+      // Full payload for new artwork
+      const allImages = [mainImageUrl, ...multiShotUrls].filter(
+        (url): url is string => url !== null,
+      );
+      if (allImages.length === 0) {
+        toast({
+          title: "Image Required",
+          description: "Please upload at least one image for the artwork.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      payload = {
+        title: data.title,
+        description: data.description,
+        orientation: data.orientation,
+        year_of_artwork: data.year,
+        quantity: data.quantity,
+        height: data.height,
+        width: data.width,
+        depth: data.depth,
+        weight: data.weight,
+        tax: data.tax,
+        listing_price: data.listingPrice,
+        discount: data.hasDiscount ? data.discountPercentage : 0,
+        amount_receivable: data.amountReceivable,
+        is_copyright_owner: data.isCopyrightOwner,
+        category: data.category,
+        images: allImages,
+        status: data.status,
+        sell_options: data.sellOptions,
+        delivery_as: data.deliveryAs,
+      };
+      if (materials.length > 0 && data.medium) {
+        payload.materials = data.medium;
+      }
+    }
+
     const url = isEditing
-      ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products/${artwork.id}`
+      ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products/edit/${artwork.id}`
       : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products`;
 
     const method = isEditing ? "PATCH" : "POST";
@@ -624,7 +828,9 @@ export default function ArtworkUploadForm({
       if (response.ok && result.status === 1) {
         toast({
           title: `Artwork ${isEditing ? "Updated" : "Saved"}!`,
-          description: `Your artwork has been successfully ${isEditing ? "updated" : "submitted"}.`,
+          description:
+            result.message ||
+            `Your artwork has been successfully ${isEditing ? "updated" : "submitted"}.`,
           variant: "success",
         });
         onSubmitSuccess();
@@ -669,19 +875,34 @@ export default function ArtworkUploadForm({
               <div
                 className="relative border-2 border-dashed rounded-lg p-6 text-center h-64 flex flex-col justify-center items-center cursor-pointer hover:bg-muted/50"
                 onClick={() =>
-                  !isViewMode && mainImageInputRef.current?.click()
+                  !mainImagePreview &&
+                  !isViewMode &&
+                  mainImageInputRef.current?.click()
                 }
               >
                 {mainImagePreview ? (
-                  <Image
-                    src={mainImagePreview}
-                    alt="Main artwork preview"
-                    fill
-                    className="absolute inset-0 w-full h-full object-contain p-2"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    quality={90}
-                    priority
-                  />
+                  <>
+                    <Image
+                      src={mainImagePreview}
+                      alt="Main artwork preview"
+                      fill
+                      className="absolute inset-0 w-full h-full object-contain p-2"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      quality={90}
+                      priority
+                    />
+                    {!isViewMode && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 h-6 w-6 z-10"
+                        onClick={handleRemoveMainImage}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </>
                 ) : (
                   <>
                     <h3 className="mt-4 text-lg font-semibold">
@@ -699,6 +920,10 @@ export default function ArtworkUploadForm({
                       size="sm"
                       className="mt-4 bg-gray-900 hover:bg-gray-800 text-white"
                       disabled={isUploadingMain || isViewMode}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        mainImageInputRef.current?.click();
+                      }}
                     >
                       <Upload className="mr-2 h-4 w-4" /> Upload
                     </Button>
@@ -715,7 +940,7 @@ export default function ArtworkUploadForm({
                 <Label>Multi Shot Angle</Label>
                 <div className="grid grid-cols-4 gap-4 mt-2">
                   {multiShotPreviews.map((preview, index) => (
-                    <div key={index}>
+                    <div key={index} className="relative">
                       <input
                         type="file"
                         ref={multiShotInputRefs[index]}
@@ -725,17 +950,18 @@ export default function ArtworkUploadForm({
                         disabled={isUploadingMulti[index] || isViewMode}
                       />
                       <div
-                        className="relative aspect-square border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted/50"
+                        className="aspect-square border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted/50"
                         onClick={() =>
+                          !preview &&
                           !isViewMode &&
                           multiShotInputRefs[index]?.current?.click()
                         }
                       >
                         {preview ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
+                          <Image
                             src={preview}
                             alt={`Multi-shot preview ${index + 1}`}
+                            fill
                             className="absolute inset-0 w-full h-full object-cover rounded-lg"
                           />
                         ) : (
@@ -747,6 +973,17 @@ export default function ArtworkUploadForm({
                           </div>
                         )}
                       </div>
+                      {preview && !isViewMode && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -top-2 -right-2 h-6 w-6 z-10"
+                          onClick={(e) => handleRemoveMultiShot(e, index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -989,7 +1226,7 @@ export default function ArtworkUploadForm({
                       <FormLabel>Sell Options</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -1017,12 +1254,7 @@ export default function ArtworkUploadForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Artwork to be delivered as</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      defaultValue={field.value}
-                      disabled
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select Category..." />
