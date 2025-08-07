@@ -6,6 +6,8 @@ import Footer from "@/components/layout/Footer";
 import { CartProvider } from "@/context/CartProvider";
 import { Suspense } from "react";
 import HeaderSkeleton from "@/components/skeletons/HeaderSkeleton";
+import { PageTransitionProvider } from "@/context/PageTransitionProvider";
+import PageTransitionLoader from "@/components/layout/PageTransitionLoader";
 
 export const metadata: Metadata = {
   title: "ArtsyCraftsy - Your destination for unique art",
@@ -32,16 +34,19 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased flex flex-col min-h-screen">
-        <CartProvider>
-          <Suspense fallback={<HeaderSkeleton />}>
-            <Header />
-          </Suspense>
-          <main className="flex-grow container mx-auto px-4 py-8">
-            {children}
-          </main>
-          <Footer />
-          <Toaster />
-        </CartProvider>
+        <PageTransitionProvider>
+          <CartProvider>
+            <Suspense fallback={<HeaderSkeleton />}>
+              <Header />
+            </Suspense>
+            <main className="flex-grow container mx-auto px-4 py-8">
+              {children}
+            </main>
+            <Footer />
+            <Toaster />
+            <PageTransitionLoader />
+          </CartProvider>
+        </PageTransitionProvider>
       </body>
     </html>
   );

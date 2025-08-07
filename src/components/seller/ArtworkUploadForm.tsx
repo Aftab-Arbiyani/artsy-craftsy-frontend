@@ -509,7 +509,11 @@ export default function ArtworkUploadForm({
     e.stopPropagation();
     if (mainImageUrl) {
       // Only track for deletion if it's an existing image (has initialArtworkData)
-      if (initialArtworkData?.media?.some((m: any) => m.file_path === mainImageUrl)) {
+      if (
+        initialArtworkData?.media?.some(
+          (m: any) => m.file_path === mainImageUrl,
+        )
+      ) {
         setDeletedImages((prev) => [...prev, mainImageUrl]);
       }
     }
@@ -523,7 +527,9 @@ export default function ArtworkUploadForm({
     const urlToRemove = multiShotUrls[index];
     if (urlToRemove) {
       // Only track for deletion if it's an existing image (has initialArtworkData)
-      if (initialArtworkData?.media?.some((m: any) => m.file_path === urlToRemove)) {
+      if (
+        initialArtworkData?.media?.some((m: any) => m.file_path === urlToRemove)
+      ) {
         setDeletedImages((prev) => [...prev, urlToRemove]);
       }
     }
@@ -603,7 +609,12 @@ export default function ArtworkUploadForm({
 
   // Separate effect to ensure medium is set correctly after materials are loaded
   useEffect(() => {
-    if (artwork && artwork.materials?.id && materials.length > 0 && isArtworkDataLoaded) {
+    if (
+      artwork &&
+      artwork.materials?.id &&
+      materials.length > 0 &&
+      isArtworkDataLoaded
+    ) {
       const currentMedium = watch("medium");
       // Only set if the current medium is different from what it should be
       if (currentMedium !== artwork.materials.id) {
@@ -746,16 +757,6 @@ export default function ArtworkUploadForm({
       if (deletedImages.length > 0) {
         payload.deleted_images = deletedImages;
       }
-
-      // Debug logging to help identify the issue
-      console.log("Edit payload debug:", {
-        deletedImages,
-        newImages,
-        mainImageUrl,
-        multiShotUrls,
-        initialArtworkMedia: initialArtworkData?.media,
-        payloadKeys: Object.keys(payload)
-      });
 
       if (Object.keys(payload).length === 0) {
         toast({
