@@ -24,6 +24,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Accordion,
   AccordionContent,
@@ -128,7 +136,7 @@ function ProductsPageComponent() {
               category: item.category?.name || "Uncategorized",
               imageUrls: item.media?.map((m: any) =>
                 m.file_path
-                  ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/${m.file_path}`
+                  ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${m.file_path}`
                   : "https://placehold.co/600x400.png",
               ) || ["https://placehold.co/600x400.png"],
               artist: item.user?.name || "Unknown Artist",

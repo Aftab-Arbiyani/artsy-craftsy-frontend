@@ -16,7 +16,7 @@ const MinimalProductCard = ({ product }: MinimalProductCardProps) => {
       : "https://placehold.co/600x400.png";
 
   const discount = product.discount ?? 0;
-  const hasDiscount = discount > 0;
+  const hasDiscount = discount > 0 && product.price;
   const discountedPrice = hasDiscount
     ? product.price * (1 - discount / 100)
     : product.price;
@@ -44,16 +44,18 @@ const MinimalProductCard = ({ product }: MinimalProductCardProps) => {
           <p className="text-sm text-muted-foreground mb-2">
             {product.artist ? `by ${product.artist}` : ""}
           </p>
-          <div className="flex items-baseline gap-2 mt-2">
-            <p className="font-semibold text-md text-primary">
-              ₹{discountedPrice.toLocaleString("en-IN")}
-            </p>
-            {hasDiscount && (
-              <p className="text-sm text-muted-foreground line-through">
-                ₹{product.price.toLocaleString("en-IN")}
+          {product.price && (
+            <div className="flex items-baseline gap-2 mt-2">
+              <p className="font-semibold text-md text-primary">
+                ₹{discountedPrice?.toLocaleString("en-IN")}
               </p>
-            )}
-          </div>
+              {hasDiscount && (
+                <p className="text-sm text-muted-foreground line-through">
+                  ₹{product.price.toLocaleString("en-IN")}
+                </p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </Link>

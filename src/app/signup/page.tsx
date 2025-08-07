@@ -182,23 +182,31 @@ function SignupFormComponent() {
   return (
     <div className="flex items-center justify-center py-12">
       <div className="w-full lg:grid lg:max-w-4xl lg:grid-cols-2 border rounded-lg overflow-hidden shadow-lg">
-        <div className="relative hidden flex-col items-center justify-center bg-muted p-10 text-white dark:border-r lg:flex">
-          <div className="absolute inset-0 bg-zinc-900" />
-          <Image
-            src="https://placehold.co/1080x1920.png"
-            alt="Image"
-            width={1080}
-            height={1920}
-            className="w-full object-cover dark:brightness-[0.4]"
-            data-ai-hint="indian art"
-          />
-          <div className="absolute bottom-10 left-10 z-20">
-            <h2 className="text-4xl font-bold text-white shadow-2xl">
-              Two Friends
-            </h2>
-            <p className="text-lg text-white/90 shadow-lg">
-              By Varsha Kharatmal
-            </p>
+        <div
+          className="relative hidden flex-col items-center justify-center bg-black p-10 text-white dark:border-r lg:flex"
+          style={{ height: accountTypeParam === "artist" ? "800px" : "700px" }}
+        >
+          {/* Adjust this height as needed */}
+          <div className="absolute inset-0 overflow-hidden">
+            <Image
+              src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}public/images/login.jpg`}
+              alt="Two Friends by Varsha Kharatmal"
+              fill
+              priority
+              className="object-cover"
+              quality={90}
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
+          <div className="relative z-10 mt-auto w-full">
+            <div className="bottom-7 left-7">
+              <h2 className="text-4xl font-bold text-white drop-shadow-lg">
+                Endless Sea
+              </h2>
+              <p className="text-lg text-white/90 drop-shadow-md">
+                By Dhruv Nayak
+              </p>
+            </div>
           </div>
         </div>
         <div className="flex items-center justify-center py-12">

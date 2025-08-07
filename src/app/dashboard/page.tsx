@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ListOrdered, Edit3, UserCircle, LogOut } from "lucide-react";
+import { ListOrdered, Edit3, UserCircle, LogOut, Package } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 interface User {
   name: string;
   email: string;
+  type?: string;
 }
 
 export default function DashboardPage() {
@@ -52,6 +53,8 @@ export default function DashboardPage() {
     );
   }
 
+  const isArtist = user.type === "artist";
+
   return (
     <div className="space-y-8">
       <section className="bg-card p-6 rounded-lg shadow">
@@ -72,7 +75,27 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div
+        className={`grid md:grid-cols-2 ${isArtist ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-6`}
+      >
+        {isArtist && (
+          <Link href="/seller/my-artworks" passHref>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xl font-medium font-headline">
+                  My Artworks
+                </CardTitle>
+                <Package className="h-6 w-6 text-primary" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Manage your artwork listings and inventory.
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+        )}
+
         <Link href="/dashboard/order-history" passHref>
           <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

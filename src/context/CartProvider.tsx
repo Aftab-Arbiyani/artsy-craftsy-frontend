@@ -9,7 +9,7 @@ interface CartState {
 }
 
 type CartAction =
-  | { type: "ADD_ITEM"; payload: Product }
+  | { type: "ADD_ITEM"; payload: Product & { price: number } }
   | { type: "REMOVE_ITEM"; payload: string } // productId
   | {
       type: "UPDATE_QUANTITY";
@@ -19,7 +19,7 @@ type CartAction =
   | { type: "LOAD_CART"; payload: CartItem[] };
 
 interface CartContextType extends CartState {
-  addItem: (product: Product) => void;
+  addItem: (product: Product & { price: number }) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -98,7 +98,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.items));
   }, [state.items]);
 
-  const addItem = (product: Product) =>
+  const addItem = (product: Product & { price: number }) =>
     dispatch({ type: "ADD_ITEM", payload: product });
   const removeItem = (productId: string) =>
     dispatch({ type: "REMOVE_ITEM", payload: productId });
