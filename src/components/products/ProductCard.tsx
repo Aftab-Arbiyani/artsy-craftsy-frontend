@@ -14,6 +14,7 @@ import {
 import { ShoppingCart, Eye } from "lucide-react";
 import { useCart } from "@/context/CartProvider";
 import { useToast } from "@/hooks/use-toast";
+import { usePageTransition } from "@/context/PageTransitionProvider";
 
 interface ProductCardProps {
   product: Product;
@@ -22,9 +23,10 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addItem } = useCart();
   const { toast } = useToast();
+  const { startTransition } = usePageTransition();
 
   const handleAddToCart = () => {
-    addItem(product);
+    addItem({ ...product, price: product.price ?? 0 });
     toast({
       title: "Added to Cart",
       description: `${product.name} has been added to your cart.`,
@@ -38,14 +40,19 @@ const ProductCard = ({ product }: ProductCardProps) => {
       : "https://placehold.co/600x400.png";
   const discountValue = product.discount ?? 0;
   const hasDiscount = discountValue > 0;
+  const priceValue = product.price ?? 0;
   const discountedPrice = hasDiscount
-    ? product.price * (1 - discountValue / 100)
-    : product.price;
+    ? priceValue * (1 - discountValue / 100)
+    : priceValue;
 
   return (
     <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
       <CardHeader className="p-0">
-        <Link href={`/products/${product.id}`} className="block group">
+        <Link
+          href={`/products/${product.id}`}
+          className="block group"
+          onClick={startTransition}
+        >
           <div className="relative w-full overflow-hidden aspect-auto">
             <Image
               src={firstImageUrl}
@@ -64,7 +71,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </Link>
       </CardHeader>
       <CardContent className="p-3 flex-grow">
-        <Link href={`/products/${product.id}`} className="block">
+        <Link
+          href={`/products/${product.id}`}
+          className="block"
+          onClick={startTransition}
+        >
           <CardTitle
             className="font-headline text-base font-semibold mb-1 truncate"
             title={product.name}
@@ -87,7 +98,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </p>
           {hasDiscount && (
             <p className="text-xs text-muted-foreground line-through">
-              ₹{product.price.toLocaleString("en-IN")}
+              ₹{(product.price ?? 0).toLocaleString("en-IN")}
             </p>
           )}
         </div>
@@ -99,7 +110,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
           >
             <ShoppingCart className="h-4 w-4" />
           </Button>
-          <Link href={`/products/${product.id}`} passHref>
+          <Link
+            href={`/products/${product.id}`}
+            passHref
+            onClick={startTransition}
+          >
             <Button
               variant="outline"
               size="icon"
