@@ -24,14 +24,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Accordion,
   AccordionContent,
@@ -447,31 +439,31 @@ function ProductsPageComponent() {
                   <div className="space-y-2 pr-2">
                     {allCategories.length === 0
                       ? Array.from({ length: 4 }).map((_, i) => (
-                          <div key={i} className="flex items-center space-x-2">
-                            <Skeleton className="h-4 w-4" />
-                            <Skeleton className="h-4 w-3/4" />
-                          </div>
-                        ))
+                        <div key={i} className="flex items-center space-x-2">
+                          <Skeleton className="h-4 w-4" />
+                          <Skeleton className="h-4 w-3/4" />
+                        </div>
+                      ))
                       : allCategories.map((category) => (
-                          <div
-                            key={category.id}
-                            className="flex items-center space-x-2"
+                        <div
+                          key={category.id}
+                          className="flex items-center space-x-2"
+                        >
+                          <Checkbox
+                            id={`cat-${category.id}`}
+                            checked={selectedCategories.includes(category.id)}
+                            onCheckedChange={(checked) =>
+                              handleCategoryChange(category.id, !!checked)
+                            }
+                          />
+                          <label
+                            htmlFor={`cat-${category.id}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                           >
-                            <Checkbox
-                              id={`cat-${category.id}`}
-                              checked={selectedCategories.includes(category.id)}
-                              onCheckedChange={(checked) =>
-                                handleCategoryChange(category.id, !!checked)
-                              }
-                            />
-                            <label
-                              htmlFor={`cat-${category.id}`}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              {category.name}
-                            </label>
-                          </div>
-                        ))}
+                            {category.name}
+                          </label>
+                        </div>
+                      ))}
                   </div>
                 </AccordionContent>
               </AccordionItem>
@@ -484,31 +476,31 @@ function ProductsPageComponent() {
                   <div className="space-y-2 pr-2">
                     {allArtists.length === 0 && !isLoadingMoreArtists
                       ? Array.from({ length: 4 }).map((_, i) => (
-                          <div key={i} className="flex items-center space-x-2">
-                            <Skeleton className="h-4 w-4" />
-                            <Skeleton className="h-4 w-3/4" />
-                          </div>
-                        ))
+                        <div key={i} className="flex items-center space-x-2">
+                          <Skeleton className="h-4 w-4" />
+                          <Skeleton className="h-4 w-3/4" />
+                        </div>
+                      ))
                       : allArtists.map((artist) => (
-                          <div
-                            key={artist.id}
-                            className="flex items-center space-x-2"
+                        <div
+                          key={artist.id}
+                          className="flex items-center space-x-2"
+                        >
+                          <Checkbox
+                            id={`artist-${artist.id}`}
+                            checked={selectedArtists.includes(artist.id)}
+                            onCheckedChange={(checked) =>
+                              handleArtistChange(artist.id, !!checked)
+                            }
+                          />
+                          <label
+                            htmlFor={`artist-${artist.id}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                           >
-                            <Checkbox
-                              id={`artist-${artist.id}`}
-                              checked={selectedArtists.includes(artist.id)}
-                              onCheckedChange={(checked) =>
-                                handleArtistChange(artist.id, !!checked)
-                              }
-                            />
-                            <label
-                              htmlFor={`artist-${artist.id}`}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              {artist.name}
-                            </label>
-                          </div>
-                        ))}
+                            {artist.name}
+                          </label>
+                        </div>
+                      ))}
                     {artistPagination.hasMore && (
                       <Button
                         variant="link"
@@ -640,7 +632,7 @@ function ProductsPageComponent() {
                 variant="ghost"
                 size="sm"
                 onClick={clearAllFilters}
-                className="text-sm text-primary hover:text-primary/80"
+                className="text-sm text-primary hover:bg-transparent hover:text-primary hover:underline"
               >
                 <ListRestart className="mr-2 h-4 w-4" /> Clear all
               </Button>

@@ -10,32 +10,60 @@ import { useState, useEffect } from "react";
 import type { Category } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
+interface Artist {
+  id: string;
+  name: string;
+}
+
 const Footer = () => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/category/dropdown`,
-        );
-        const result = await response.json();
-        if (response.ok && result.status === 1 && Array.isArray(result.data)) {
-          setCategories(result.data.slice(0, 6)); // Take first 6 categories
+        const [categoryResponse, artistResponse] = await Promise.all([
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/category?take=6&skip=0`,
+          ),
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/artists-dropdown?take=6&skip=0`,
+          ),
+        ]);
+
+        const categoryResult = await categoryResponse.json();
+        if (
+          categoryResponse.ok &&
+          categoryResult.status === 1 &&
+          Array.isArray(categoryResult.data)
+        ) {
+          setCategories(categoryResult.data);
         } else {
           setCategories([]);
         }
+
+        const artistResult = await artistResponse.json();
+        if (
+          artistResponse.ok &&
+          artistResult.status === 1 &&
+          Array.isArray(artistResult.data)
+        ) {
+          setArtists(artistResult.data);
+        } else {
+          setArtists([]);
+        }
       } catch (error) {
-        console.error("Failed to fetch categories:", error);
+        console.error("Failed to fetch footer data:", error);
         setCategories([]);
+        setArtists([]);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchCategories();
+    fetchData();
   }, []);
 
   return (
@@ -57,7 +85,7 @@ const Footer = () => {
         <Separator className="my-8" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-3 gap-8">
+          <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-8">
             <div>
               <h3 className="font-semibold text-foreground mb-4">
                 FOR COLLECTORS
@@ -110,22 +138,45 @@ const Footer = () => {
               <ul className="space-y-2 text-sm">
                 {isLoading
                   ? Array.from({ length: 6 }).map((_, index) => (
-                      <li key={index}>
-                        <Skeleton className="h-4 w-3/4" />
-                      </li>
-                    ))
+                    <li key={index}>
+                      <Skeleton className="h-4 w-3/4" />
+                    </li>
+                  ))
                   : categories.map((category) => (
-                      <li key={category.id}>
-                        <Link
-                          href={`/products?category=${category.id}`}
-                          className="text-muted-foreground hover:text-primary"
-                        >
-                          {category.name}
-                        </Link>
-                      </li>
-                    ))}
+                    <li key={category.id}>
+                      <Link
+                        href={`/products?category=${category.id}`}
+                        className="text-muted-foreground hover:text-primary"
+                      >
+                        {category.name}
+                      </Link>
+                    </li>
+                  ))}
               </ul>
             </div>
+
+            <div>
+              <h3 className="font-semibold text-foreground mb-4">ARTISTS</h3>
+              <ul className="space-y-2 text-sm">
+                {isLoading
+                  ? Array.from({ length: 6 }).map((_, index) => (
+                    <li key={index}>
+                      <Skeleton className="h-4 w-3/4" />
+                    </li>
+                  ))
+                  : artists.map((artist) => (
+                    <li key={artist.id}>
+                      <Link
+                        href={`/products?artist=${artist.id}`}
+                        className="text-muted-foreground hover:text-primary"
+                      >
+                        {artist.name}
+                      </Link>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+
             <div>
               <h3 className="font-semibold text-foreground mb-4">ABOUT</h3>
               <ul className="space-y-2 text-sm">
