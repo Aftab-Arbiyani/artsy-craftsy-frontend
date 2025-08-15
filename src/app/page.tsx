@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/products/ProductCard";
 import type { Product } from "@/lib/types";
 import Image from "next/image";
-import { Palette, Lightbulb, Users, PlusSquare, Loader2 } from "lucide-react";
+import { Palette, Lightbulb, Users, PlusSquare } from "lucide-react";
 import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 import { useState, useEffect } from "react";
 import type { Category } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
+import { usePageTransition } from "@/context/PageTransitionProvider";
 
 export default function Home() {
   const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
@@ -18,8 +19,8 @@ export default function Home() {
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [userType, setUserType] = useState<string | null>(null);
-  const [isNavigating, setIsNavigating] = useState(false);
   const router = useRouter();
+  const { startTransition } = usePageTransition();
 
   useEffect(() => {
     const userDataString = localStorage.getItem("user");
@@ -111,10 +112,13 @@ export default function Home() {
     fetchCategories();
   }, []);
 
-  const handleViewAllClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
     e.preventDefault();
-    setIsNavigating(true);
-    router.push("/products");
+    startTransition();
+    router.push(href);
   };
 
   return (
@@ -141,7 +145,11 @@ export default function Home() {
                 gallery.
               </p>
               <div className="flex items-center justify-center">
-                <Link href="/seller/add-product" passHref>
+                <Link
+                  href="/seller/add-product"
+                  passHref
+                  onClick={(e) => handleNavClick(e, "/seller/add-product")}
+                >
                   <Button
                     size="lg"
                     className="bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -161,7 +169,11 @@ export default function Home() {
                 paintings, sculptures, and custom art commissions.
               </p>
               <div className="mx-auto mt-6 grid max-w-sm grid-cols-1 gap-4 sm:max-w-md sm:grid-cols-2">
-                <Link href="/products" passHref>
+                <Link
+                  href="/products"
+                  passHref
+                  onClick={(e) => handleNavClick(e, "/products")}
+                >
                   <Button
                     size="lg"
                     className="bg-primary hover:bg-primary/90 text-primary-foreground w-full"
@@ -169,7 +181,11 @@ export default function Home() {
                     Explore Collection <Palette className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Link href="/custom-art" passHref>
+                <Link
+                  href="/custom-art"
+                  passHref
+                  onClick={(e) => handleNavClick(e, "/custom-art")}
+                >
                   <Button
                     size="lg"
                     variant="outline"
@@ -202,6 +218,9 @@ export default function Home() {
                   href={`/products?category=${category.id}`}
                   key={category.id}
                   passHref
+                  onClick={(e) =>
+                    handleNavClick(e, `/products?category=${category.id}`)
+                  }
                 >
                   <div
                     className="group text-center animate-in fade-in slide-in-from-bottom-4 duration-500"
@@ -253,16 +272,13 @@ export default function Home() {
               ))}
         </div>
         <div className="text-center mt-12">
-          <Link href="/products" passHref onClick={handleViewAllClick}>
-            <Button variant="secondary" size="lg" disabled={isNavigating}>
-              {isNavigating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                "View All Products"
-              )}
+          <Link
+            href="/products"
+            passHref
+            onClick={(e) => handleNavClick(e, "/products")}
+          >
+            <Button variant="secondary" size="lg">
+              View All Products
             </Button>
           </Link>
         </div>
@@ -326,7 +342,11 @@ export default function Home() {
                   Join our community of artists and start selling your creations
                   to a global audience.
                 </p>
-                <Link href="/seller/add-product" passHref>
+                <Link
+                  href="/seller/add-product"
+                  passHref
+                  onClick={(e) => handleNavClick(e, "/seller/add-product")}
+                >
                   <Button
                     size="lg"
                     className="bg-accent hover:bg-accent/90 text-accent-foreground"
@@ -344,7 +364,11 @@ export default function Home() {
                   Let our artists create a masterpiece just for you. Describe
                   your idea, and we'll make it happen.
                 </p>
-                <Link href="/custom-art" passHref>
+                <Link
+                  href="/custom-art"
+                  passHref
+                  onClick={(e) => handleNavClick(e, "/custom-art")}
+                >
                   <Button
                     size="lg"
                     className="bg-accent hover:bg-accent/90 text-accent-foreground"

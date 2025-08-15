@@ -17,6 +17,7 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
+import { usePageTransition } from "@/context/PageTransitionProvider";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -27,6 +28,7 @@ const navLinks = [
 const Header = () => {
   const { getItemCount } = useCart();
   const { toast } = useToast();
+  const { startTransition } = usePageTransition();
   const [cartItemCount, setCartItemCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
@@ -49,11 +51,11 @@ const Header = () => {
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (searchTerm.trim()) {
-      router.push(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
-    } else {
-      router.push("/products");
-    }
+    startTransition();
+    const newPath = searchTerm.trim()
+      ? `/products?search=${encodeURIComponent(searchTerm.trim())}`
+      : "/products";
+    router.push(newPath);
     // Close mobile menus on submit
     setIsMobileMenuOpen(false);
     setIsMobileSearchOpen(false);
@@ -86,6 +88,7 @@ const Header = () => {
   }, [pathname]);
 
   const handleLogout = () => {
+    startTransition();
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
     setIsLoggedIn(false);
@@ -99,16 +102,26 @@ const Header = () => {
     router.refresh();
   };
 
-  const NavLinkItem = ({ href, label }: { href: string; label: string }) => (
-    <Link href={href} passHref>
-      <Button
-        variant={pathname === href ? "secondary" : "ghost"}
-        className={`font-body ${pathname === href ? "font-semibold" : ""}`}
-      >
-        {label}
-      </Button>
-    </Link>
-  );
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
+    if (pathname === href) {
+      e.preventDefault();
+      return;
+    }
+    startTransition();
+  };
+
+  const NavLinkItem = ({ href, label }: { href: string; label: string }) => {
+    return (
+      <Link href={href} passHref onClick={(e) => handleNavClick(e, href)}>
+        <Button
+          variant={pathname === href ? "secondary" : "ghost"}
+          className={`font-body ${pathname === href ? "font-semibold" : ""}`}
+        >
+          {label}
+        </Button>
+      </Link>
+    );
+  };
 
   return (
     <header className="bg-card shadow-md sticky top-0 z-50">
@@ -139,7 +152,11 @@ const Header = () => {
 
         {/* Right Section - Desktop Actions */}
         <div className="hidden md:flex flex-shrink-0 justify-end items-center space-x-1">
-          <Link href="/cart" passHref>
+          <Link
+            href="/cart"
+            passHref
+            onClick={(e) => handleNavClick(e, "/cart")}
+          >
             <Button
               variant="ghost"
               size="icon"
@@ -157,7 +174,11 @@ const Header = () => {
 
           {isLoggedIn ? (
             <>
-              <Link href="/dashboard" passHref>
+              <Link
+                href="/dashboard"
+                passHref
+                onClick={(e) => handleNavClick(e, "/dashboard")}
+              >
                 <Button variant="ghost" size="icon" aria-label="User Dashboard">
                   <UserCircle />
                 </Button>
@@ -168,12 +189,20 @@ const Header = () => {
             </>
           ) : (
             <>
-              <Link href="/login" passHref>
+              <Link
+                href="/login"
+                passHref
+                onClick={(e) => handleNavClick(e, "/login")}
+              >
                 <Button variant="ghost" size="sm">
                   Log In
                 </Button>
               </Link>
-              <Link href="/signup?type=customer" passHref>
+              <Link
+                href="/signup?type=customer"
+                passHref
+                onClick={(e) => handleNavClick(e, "/signup?type=customer")}
+              >
                 <Button size="sm">Sign Up</Button>
               </Link>
             </>
@@ -189,7 +218,11 @@ const Header = () => {
           >
             <Search />
           </Button>
-          <Link href="/cart" passHref>
+          <Link
+            href="/cart"
+            passHref
+            onClick={(e) => handleNavClick(e, "/cart")}
+          >
             <Button
               variant="ghost"
               size="icon"
@@ -205,7 +238,11 @@ const Header = () => {
             </Button>
           </Link>
           {isLoggedIn && (
-            <Link href="/dashboard" passHref>
+            <Link
+              href="/dashboard"
+              passHref
+              onClick={(e) => handleNavClick(e, "/dashboard")}
+            >
               <Button variant="ghost" size="icon" aria-label="User Dashboard">
                 <UserCircle />
               </Button>
@@ -270,12 +307,22 @@ const Header = () => {
               </div>
             ) : (
               <div className="flex flex-col space-y-2 w-full border-t border-border pt-2 mt-2">
-                <Link href="/login" passHref className="w-full">
+                <Link
+                  href="/login"
+                  passHref
+                  className="w-full"
+                  onClick={(e) => handleNavClick(e, "/login")}
+                >
                   <Button variant="outline" className="w-full">
                     Log In
                   </Button>
                 </Link>
-                <Link href="/signup?type=customer" passHref className="w-full">
+                <Link
+                  href="/signup?type=customer"
+                  passHref
+                  className="w-full"
+                  onClick={(e) => handleNavClick(e, "/signup?type=customer")}
+                >
                   <Button className="w-full">Sign Up</Button>
                 </Link>
               </div>
