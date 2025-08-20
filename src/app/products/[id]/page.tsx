@@ -15,6 +15,18 @@ import ProductDetailsSkeleton from "@/components/skeletons/ProductDetailsSkeleto
 import { cn } from "@/lib/utils";
 import MinimalProductCard from "@/components/products/MinimalProductCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { usePageTransition } from "@/context/PageTransitionProvider";
 
 const DetailRow = ({
   label,
@@ -45,6 +57,19 @@ export default function ProductDetailsPage() {
 
   const { addItem } = useCart();
   const { toast } = useToast();
+  const { startTransition } = usePageTransition();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check for auth token on the client side
+    const token = localStorage.getItem("authToken");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleAuthRedirect = (path: string) => {
+    startTransition();
+    router.push(path);
+  };
 
   useEffect(() => {
     if (!id) {
@@ -192,6 +217,38 @@ export default function ProductDetailsPage() {
       ? product.price * (1 - (product.discount ?? 0) / 100)
       : (product.price ?? 0);
 
+  const AuthPopup = ({
+    children,
+    onAction,
+  }: {
+    children: React.ReactNode;
+    onAction: () => void;
+  }) => (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Authentication Required</AlertDialogTitle>
+          <AlertDialogDescription>
+            Please log in or create an account to continue.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => handleAuthRedirect("/signup?type=customer")}
+            className="bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+          >
+            Sign Up
+          </AlertDialogAction>
+          <AlertDialogAction onClick={() => handleAuthRedirect("/login")}>
+            Log In
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   return (
     <div className="space-y-12">
       {/* Centered Image Gallery */}
@@ -260,21 +317,41 @@ export default function ProductDetailsPage() {
           </div>
           {product.price && (
             <div className="flex items-center gap-2 w-full md:w-auto">
-              <Button
-                size="lg"
-                onClick={handleAddToCart}
-                className="flex-1 bg-primary hover:bg-primary/90"
-              >
-                <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-              </Button>
-              <Button
-                size="lg"
-                onClick={handleBuyNow}
-                variant="outline"
-                className="flex-1"
-              >
-                <Zap className="mr-2 h-5 w-5" /> Buy Now
-              </Button>
+              {isLoggedIn ? (
+                <Button
+                  size="lg"
+                  onClick={handleAddToCart}
+                  className="flex-1 bg-primary hover:bg-primary/90"
+                >
+                  <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+                </Button>
+              ) : (
+                <AuthPopup onAction={handleAddToCart}>
+                  <Button
+                    size="lg"
+                    className="flex-1 bg-primary hover:bg-primary/90"
+                  >
+                    <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+                  </Button>
+                </AuthPopup>
+              )}
+
+              {isLoggedIn ? (
+                <Button
+                  size="lg"
+                  onClick={handleBuyNow}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Zap className="mr-2 h-5 w-5" /> Buy Now
+                </Button>
+              ) : (
+                <AuthPopup onAction={handleBuyNow}>
+                  <Button size="lg" variant="outline" className="flex-1">
+                    <Zap className="mr-2 h-5 w-5" /> Buy Now
+                  </Button>
+                </AuthPopup>
+              )}
             </div>
           )}
         </div>

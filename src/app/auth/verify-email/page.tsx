@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardHeader,
@@ -19,11 +19,9 @@ enum VerificationStatus {
   Error,
 }
 
-function VerificationComponent() {
-  const searchParams = useSearchParams();
+export default function VerificationComponent({ id }: { id?: string }) {
   const router = useRouter();
   const { toast } = useToast();
-  const id = searchParams.get("id");
 
   const [status, setStatus] = useState<VerificationStatus>(
     VerificationStatus.Verifying,
@@ -60,7 +58,7 @@ function VerificationComponent() {
         } else {
           setMessage(
             result.message ||
-              "Failed to verify email. The link may have expired or is invalid.",
+            "Failed to verify email. The link may have expired or is invalid.",
           );
           setStatus(VerificationStatus.Error);
         }
@@ -128,19 +126,5 @@ function VerificationComponent() {
         <CardHeader>{renderContent()}</CardHeader>
       </Card>
     </div>
-  );
-}
-
-export default function VerifyEmailPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex justify-center items-center min-h-[calc(100vh-200px)] py-8 px-4">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        </div>
-      }
-    >
-      <VerificationComponent />
-    </Suspense>
   );
 }

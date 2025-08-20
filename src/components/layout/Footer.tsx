@@ -84,9 +84,9 @@ const Footer = () => {
 
         <Separator className="my-8" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-8">
-            <div>
+        <div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-8 text-left">
+            <div className="col-span-1">
               <h3 className="font-semibold text-foreground mb-4">
                 FOR COLLECTORS
               </h3>
@@ -108,7 +108,9 @@ const Footer = () => {
                   </Link>
                 </li>
               </ul>
-              <h3 className="font-semibold text-foreground mb-4 mt-6">
+            </div>
+            <div className="col-span-1">
+              <h3 className="font-semibold text-foreground mb-4">
                 FOR SELLERS
               </h3>
               <ul className="space-y-2 text-sm">
@@ -138,20 +140,20 @@ const Footer = () => {
               <ul className="space-y-2 text-sm">
                 {isLoading
                   ? Array.from({ length: 6 }).map((_, index) => (
-                    <li key={index}>
-                      <Skeleton className="h-4 w-3/4" />
-                    </li>
-                  ))
+                      <li key={index}>
+                        <Skeleton className="h-4 w-3/4" />
+                      </li>
+                    ))
                   : categories.map((category) => (
-                    <li key={category.id}>
-                      <Link
-                        href={`/products?category=${category.id}`}
-                        className="text-muted-foreground hover:text-primary"
-                      >
-                        {category.name}
-                      </Link>
-                    </li>
-                  ))}
+                      <li key={category.id}>
+                        <Link
+                          href={`/products?category=${category.id}`}
+                          className="text-muted-foreground hover:text-primary"
+                        >
+                          {category.name}
+                        </Link>
+                      </li>
+                    ))}
               </ul>
             </div>
 
@@ -160,20 +162,20 @@ const Footer = () => {
               <ul className="space-y-2 text-sm">
                 {isLoading
                   ? Array.from({ length: 6 }).map((_, index) => (
-                    <li key={index}>
-                      <Skeleton className="h-4 w-3/4" />
-                    </li>
-                  ))
+                      <li key={index}>
+                        <Skeleton className="h-4 w-3/4" />
+                      </li>
+                    ))
                   : artists.map((artist) => (
-                    <li key={artist.id}>
-                      <Link
-                        href={`/products?artist=${artist.id}`}
-                        className="text-muted-foreground hover:text-primary"
-                      >
-                        {artist.name}
-                      </Link>
-                    </li>
-                  ))}
+                      <li key={artist.id}>
+                        <Link
+                          href={`/products?artist=${artist.id}`}
+                          className="text-muted-foreground hover:text-primary"
+                        >
+                          {artist.name}
+                        </Link>
+                      </li>
+                    ))}
               </ul>
             </div>
 
@@ -206,7 +208,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/contact"
                     className="text-muted-foreground hover:text-primary"
                   >
                     Contact Us
@@ -229,26 +231,6 @@ const Footer = () => {
                   </Link>
                 </li>
               </ul>
-            </div>
-          </div>
-          <div className="lg:col-span-2 lg:pl-8">
-            <div className="mt-8 md:mt-0">
-              <h3 className="font-semibold text-foreground mb-4">
-                Get In Touch With Us
-              </h3>
-              <form className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Input placeholder="Your Name" />
-                  <Input type="email" placeholder="Your Email" />
-                </div>
-                <Textarea placeholder="Your Message" rows={4} />
-                <Button
-                  type="submit"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                >
-                  Send Message
-                </Button>
-              </form>
             </div>
           </div>
         </div>
