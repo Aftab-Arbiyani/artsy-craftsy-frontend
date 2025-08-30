@@ -272,7 +272,7 @@ export default function LoginPage() {
                 </Link>
               </p>
               <p className="text-foreground">
-                Create your <span className="font-bold">Seller Artist</span>{" "}
+                Create your <span className="font-bold">Seller / Artist</span>{" "}
                 account{" "}
                 <Link
                   href="/signup?type=artist"
