@@ -5,13 +5,19 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ListOrdered, Edit3, UserCircle, LogOut, Package } from "lucide-react";
+import {
+  ListOrdered,
+  Edit3,
+  UserCircle,
+  LogOut,
+  Package,
+  Loader2,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 interface User {
@@ -20,7 +26,7 @@ interface User {
   type?: string;
 }
 
-export default function DashboardPage() {
+function DashboardComponent() {
   const router = useRouter();
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
@@ -48,7 +54,7 @@ export default function DashboardPage() {
   if (!user) {
     return (
       <div className="flex justify-center items-center h-full">
-        <p>Loading...</p>
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
@@ -159,5 +165,19 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <DashboardComponent />
+    </Suspense>
   );
 }

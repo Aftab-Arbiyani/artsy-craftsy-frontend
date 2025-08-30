@@ -24,14 +24,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Accordion,
   AccordionContent,
@@ -640,7 +632,7 @@ function ProductsPageComponent() {
                 variant="ghost"
                 size="sm"
                 onClick={clearAllFilters}
-                className="text-sm text-primary hover:text-primary/80"
+                className="text-sm text-primary hover:bg-transparent hover:text-primary hover:underline"
               >
                 <ListRestart className="mr-2 h-4 w-4" /> Clear all
               </Button>

@@ -210,7 +210,7 @@ export default function LoginPage() {
                       <div className="flex items-center">
                         <FormLabel>Password</FormLabel>
                         <Link
-                          href="#"
+                          href="/auth/forgot-password"
                           className="ml-auto inline-block text-sm underline"
                         >
                           Forgot Password?
@@ -272,7 +272,7 @@ export default function LoginPage() {
                 </Link>
               </p>
               <p className="text-foreground">
-                Create your <span className="font-bold">Seller Artist</span>{" "}
+                Create your <span className="font-bold">Seller / Artist</span>{" "}
                 account{" "}
                 <Link
                   href="/signup?type=artist"

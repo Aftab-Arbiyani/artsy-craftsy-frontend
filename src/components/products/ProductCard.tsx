@@ -15,6 +15,19 @@ import { ShoppingCart, Eye } from "lucide-react";
 import { useCart } from "@/context/CartProvider";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTransition } from "@/context/PageTransitionProvider";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ProductCardProps {
   product: Product;
@@ -24,6 +37,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { addItem } = useCart();
   const { toast } = useToast();
   const { startTransition } = usePageTransition();
+  const router = useRouter();
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check for auth token on the client side
+    const token = localStorage.getItem("authToken");
+    setIsLoggedIn(!!token);
+  }, []);
 
   const handleAddToCart = () => {
     addItem({ ...product, price: product.price ?? 0 });
@@ -32,6 +54,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
       description: `${product.name} has been added to your cart.`,
       variant: "success",
     });
+  };
+
+  const handleAuthRedirect = (path: string) => {
+    startTransition();
+    router.push(path);
   };
 
   const firstImageUrl =
@@ -103,13 +130,50 @@ const ProductCard = ({ product }: ProductCardProps) => {
           )}
         </div>
         <div className="flex items-center gap-1">
-          <Button
-            onClick={handleAddToCart}
-            size="icon"
-            className="bg-primary hover:bg-primary/90 h-8 w-8"
-          >
-            <ShoppingCart className="h-4 w-4" />
-          </Button>
+          {isLoggedIn ? (
+            <Button
+              onClick={handleAddToCart}
+              size="icon"
+              className="bg-primary hover:bg-primary/90 h-8 w-8"
+            >
+              <ShoppingCart className="h-4 w-4" />
+            </Button>
+          ) : (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="icon"
+                  className="bg-primary hover:bg-primary/90 h-8 w-8"
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Authentication Required</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Please log in or create an account to add items to your
+                    cart.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => handleAuthRedirect("/signup?type=customer")}
+                    className="bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+                  >
+                    Sign Up
+                  </AlertDialogAction>
+                  <AlertDialogAction
+                    onClick={() => handleAuthRedirect("/login")}
+                  >
+                    Log In
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+
           <Link
             href={`/products/${product.id}`}
             passHref

@@ -6,6 +6,9 @@ export type Product = {
   category: string; // Allow any string for category name
   imageUrls: string[];
   artist?: string;
+  artistId?: string;
+  artistBio?: string;
+  artistImage?: string;
   dimensions?: string;
   medium?: string;
   dataAiHint?: string;

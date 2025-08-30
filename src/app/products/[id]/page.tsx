@@ -15,6 +15,18 @@ import ProductDetailsSkeleton from "@/components/skeletons/ProductDetailsSkeleto
 import { cn } from "@/lib/utils";
 import MinimalProductCard from "@/components/products/MinimalProductCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { usePageTransition } from "@/context/PageTransitionProvider";
 
 const DetailRow = ({
   label,
@@ -45,6 +57,19 @@ export default function ProductDetailsPage() {
 
   const { addItem } = useCart();
   const { toast } = useToast();
+  const { startTransition } = usePageTransition();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check for auth token on the client side
+    const token = localStorage.getItem("authToken");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleAuthRedirect = (path: string) => {
+    startTransition();
+    router.push(path);
+  };
 
   useEffect(() => {
     if (!id) {
@@ -85,6 +110,9 @@ export default function ProductDetailsPage() {
             category: apiProduct.category?.name || "Uncategorized",
             imageUrls: imageUrls,
             artist: apiProduct.user?.name || "Unknown Artist",
+            artistId: apiProduct.user?.id,
+            artistBio: apiProduct.user?.bio,
+            artistImage: apiProduct.user?.profile_picture,
             medium: apiProduct.materials?.name,
             dimensions:
               apiProduct.width && apiProduct.height
@@ -192,6 +220,38 @@ export default function ProductDetailsPage() {
       ? product.price * (1 - (product.discount ?? 0) / 100)
       : (product.price ?? 0);
 
+  const AuthPopup = ({
+    children,
+    onAction,
+  }: {
+    children: React.ReactNode;
+    onAction: () => void;
+  }) => (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Authentication Required</AlertDialogTitle>
+          <AlertDialogDescription>
+            Please log in or create an account to continue.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => handleAuthRedirect("/signup?type=customer")}
+            className="bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+          >
+            Sign Up
+          </AlertDialogAction>
+          <AlertDialogAction onClick={() => handleAuthRedirect("/login")}>
+            Log In
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   return (
     <div className="space-y-12">
       {/* Centered Image Gallery */}
@@ -260,21 +320,41 @@ export default function ProductDetailsPage() {
           </div>
           {product.price && (
             <div className="flex items-center gap-2 w-full md:w-auto">
-              <Button
-                size="lg"
-                onClick={handleAddToCart}
-                className="flex-1 bg-primary hover:bg-primary/90"
-              >
-                <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-              </Button>
-              <Button
-                size="lg"
-                onClick={handleBuyNow}
-                variant="outline"
-                className="flex-1"
-              >
-                <Zap className="mr-2 h-5 w-5" /> Buy Now
-              </Button>
+              {isLoggedIn ? (
+                <Button
+                  size="lg"
+                  onClick={handleAddToCart}
+                  className="flex-1 bg-primary hover:bg-primary/90"
+                >
+                  <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+                </Button>
+              ) : (
+                <AuthPopup onAction={handleAddToCart}>
+                  <Button
+                    size="lg"
+                    className="flex-1 bg-primary hover:bg-primary/90"
+                  >
+                    <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+                  </Button>
+                </AuthPopup>
+              )}
+
+              {isLoggedIn ? (
+                <Button
+                  size="lg"
+                  onClick={handleBuyNow}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Zap className="mr-2 h-5 w-5" /> Buy Now
+                </Button>
+              ) : (
+                <AuthPopup onAction={handleBuyNow}>
+                  <Button size="lg" variant="outline" className="flex-1">
+                    <Zap className="mr-2 h-5 w-5" /> Buy Now
+                  </Button>
+                </AuthPopup>
+              )}
             </div>
           )}
         </div>
@@ -302,34 +382,49 @@ export default function ProductDetailsPage() {
               <div className="space-y-8 sticky top-24">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16">
-                    <AvatarImage
-                      src="https://placehold.co/100x100.png"
+                    <Image
+                      src={
+                        product.artistImage
+                          ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${product.artistImage}`
+                          : "https://placehold.co/64x64.png"
+                      }
                       alt={product.artist}
+                      width={64}
+                      height={64}
                       data-ai-hint="artist portrait"
                     />
                     <AvatarFallback>{product.artist.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div>
                     <h3 className="text-lg font-bold">{product.artist}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Kolkata, India
-                    </p>
-                    <Button
-                      variant="link"
-                      className="p-0 h-auto text-sm text-red-500"
-                    >
-                      View Profile
-                    </Button>
+                    {product.artistId && (
+                      <Link
+                        href={`/artist/${product.artistId}`}
+                        passHref
+                        onClick={startTransition}
+                      >
+                        <Button
+                          variant="link"
+                          className="p-0 h-auto text-sm text-red-500"
+                        >
+                          View Profile
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-lg font-bold">About Artist</h3>
                   <p className="text-muted-foreground text-sm">
-                    (This is a placeholder bio). This artist has a unique
-                    vision, blending classical techniques with modern themes to
-                    create compelling narratives on canvas. With a passion for
-                    color and form, their work invites viewers into a world of
-                    imagination and emotion.
+                    {product.artistBio && product.artistBio.length > 200 ? (
+                      <>
+                        <span>
+                          {product.artistBio.slice(0, 200)}...
+                        </span>
+                      </>
+                    ) : (
+                      product.artistBio
+                    )}
                   </p>
                 </div>
               </div>
