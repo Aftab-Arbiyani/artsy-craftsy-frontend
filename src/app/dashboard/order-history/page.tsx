@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { PackageSearch, ArrowLeft } from "lucide-react";
-import { useState, useEffect } from "react";
+import { PackageSearch, ArrowLeft, Loader2 } from "lucide-react";
+import { useState, useEffect, Suspense } from "react";
 import TableRowSkeleton from "@/components/skeletons/TableRowSkeleton";
 
 // Placeholder data
@@ -41,7 +41,7 @@ const mockOrdersData = [
   },
 ];
 
-export default function OrderHistoryPage() {
+function OrderHistoryComponent() {
   const [orders, setOrders] = useState<typeof mockOrdersData>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -147,5 +147,19 @@ export default function OrderHistoryPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function OrderHistoryPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <OrderHistoryComponent />
+    </Suspense>
   );
 }

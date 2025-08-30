@@ -18,9 +18,9 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Edit3, PlusCircle, ArrowLeft } from "lucide-react";
+import { Edit3, PlusCircle, ArrowLeft, Loader2 } from "lucide-react";
 import type { CustomArtRequest } from "@/lib/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import TableRowSkeleton from "@/components/skeletons/TableRowSkeleton";
 
 // Placeholder data
@@ -45,7 +45,7 @@ const mockRequestsData: CustomArtRequest[] = [
   },
 ];
 
-export default function MyRequestsPage() {
+function MyRequestsComponent() {
   const [requests, setRequests] = useState<CustomArtRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -157,5 +157,19 @@ export default function MyRequestsPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function MyRequestsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <MyRequestsComponent />
+    </Suspense>
   );
 }

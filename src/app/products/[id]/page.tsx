@@ -110,6 +110,9 @@ export default function ProductDetailsPage() {
             category: apiProduct.category?.name || "Uncategorized",
             imageUrls: imageUrls,
             artist: apiProduct.user?.name || "Unknown Artist",
+            artistId: apiProduct.user?.id,
+            artistBio: apiProduct.user?.bio,
+            artistImage: apiProduct.user?.profile_picture,
             medium: apiProduct.materials?.name,
             dimensions:
               apiProduct.width && apiProduct.height
@@ -379,34 +382,49 @@ export default function ProductDetailsPage() {
               <div className="space-y-8 sticky top-24">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16">
-                    <AvatarImage
-                      src="https://placehold.co/100x100.png"
+                    <Image
+                      src={
+                        product.artistImage
+                          ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${product.artistImage}`
+                          : "https://placehold.co/64x64.png"
+                      }
                       alt={product.artist}
+                      width={64}
+                      height={64}
                       data-ai-hint="artist portrait"
                     />
                     <AvatarFallback>{product.artist.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div>
                     <h3 className="text-lg font-bold">{product.artist}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Kolkata, India
-                    </p>
-                    <Button
-                      variant="link"
-                      className="p-0 h-auto text-sm text-red-500"
-                    >
-                      View Profile
-                    </Button>
+                    {product.artistId && (
+                      <Link
+                        href={`/artist/${product.artistId}`}
+                        passHref
+                        onClick={startTransition}
+                      >
+                        <Button
+                          variant="link"
+                          className="p-0 h-auto text-sm text-red-500"
+                        >
+                          View Profile
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-lg font-bold">About Artist</h3>
                   <p className="text-muted-foreground text-sm">
-                    (This is a placeholder bio). This artist has a unique
-                    vision, blending classical techniques with modern themes to
-                    create compelling narratives on canvas. With a passion for
-                    color and form, their work invites viewers into a world of
-                    imagination and emotion.
+                    {product.artistBio && product.artistBio.length > 200 ? (
+                      <>
+                        <span>
+                          {product.artistBio.slice(0, 200)}...
+                        </span>
+                      </>
+                    ) : (
+                      product.artistBio
+                    )}
                   </p>
                 </div>
               </div>

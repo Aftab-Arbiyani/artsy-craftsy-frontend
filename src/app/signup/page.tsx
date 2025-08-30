@@ -373,11 +373,43 @@ function SignupFormComponent() {
                 </Button>
               </form>
             </Form>
-            <div className="mt-4 text-center text-sm">
-              Already have an account?{" "}
-              <Link href="/login" className="underline text-primary">
-                Log In
-              </Link>
+            <div className="mt-8 space-y-4 text-center text-sm">
+              {accountTypeParam === "customer" ? (
+                <>
+                  <p className="text-foreground">
+                    Already have a <span className="font-bold">Collector</span>{" "}
+                    account?{" "}
+                    <Link
+                      href="/login"
+                      className="underline text-red-500 font-medium"
+                    >
+                      Login
+                    </Link>
+                  </p>
+                  <p className="text-foreground">
+                    Create your Seller{" "}
+                    <span className="font-bold">Artist / Gallery</span> account{" "}
+                    <Link
+                      href="/signup?type=artist"
+                      className="underline text-red-500 font-medium"
+                    >
+                      Register Now
+                    </Link>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-foreground">
+                    Already have an account?{" "}
+                    <Link
+                      href="/login"
+                      className="underline text-red-500 font-medium"
+                    >
+                      Login
+                    </Link>
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>

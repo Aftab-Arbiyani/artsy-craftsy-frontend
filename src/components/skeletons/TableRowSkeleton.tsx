@@ -13,9 +13,9 @@ export default function TableRowSkeleton({
   return (
     <>
       {Array.from({ length: rowCount }).map((_, rowIndex) => (
-        <TableRow key={rowIndex}>
+        <TableRow key={`skeleton-row-${rowIndex}`}>
           {Array.from({ length: columns }).map((_, cellIndex) => (
-            <TableCell key={cellIndex}>
+            <TableCell key={`skeleton-cell-${rowIndex}-${cellIndex}`}>
               <Skeleton className="h-5 w-full" />
             </TableCell>
           ))}
