@@ -32,7 +32,15 @@ const fileToDataUri = (file: File): Promise<string> => {
   });
 };
 
-export default function ArtIdeaGenerator() {
+interface ArtIdeaGeneratorProps {
+  isLoggedIn: boolean;
+  onAuthRequired: () => void;
+}
+
+export default function ArtIdeaGenerator({
+  isLoggedIn,
+  onAuthRequired,
+}: ArtIdeaGeneratorProps) {
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -57,6 +65,11 @@ export default function ArtIdeaGenerator() {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    if (!isLoggedIn) {
+      onAuthRequired();
+      return;
+    }
+
     if (!description.trim()) {
       toast({
         title: "Description needed",
@@ -102,7 +115,7 @@ export default function ArtIdeaGenerator() {
           Generator
         </CardTitle>
         <CardDescription>
-          Need inspiration? Describe your vision, upload an optional reference
+          Need inspiration? Describe your vision, upload an reference
           image, and let our AI suggest some creative art ideas!
         </CardDescription>
       </CardHeader>

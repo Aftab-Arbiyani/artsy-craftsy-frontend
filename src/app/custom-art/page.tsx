@@ -1,8 +1,63 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import CustomArtForm from "@/components/custom-art/CustomArtForm";
 import ArtIdeaGenerator from "@/components/custom-art/ArtIdeaGenerator";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { usePageTransition } from "@/context/PageTransitionProvider";
 
 export default function CustomArtPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const router = useRouter();
+  const { startTransition } = usePageTransition();
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleAuthRedirect = (path: string) => {
+    startTransition();
+    router.push(path);
+  };
+
+  const AuthPopup = () => (
+    <AlertDialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Authentication Required</AlertDialogTitle>
+          <AlertDialogDescription>
+            Please log in or create an account to continue.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => handleAuthRedirect("/signup?type=customer")}
+            className="bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+          >
+            Sign Up
+          </AlertDialogAction>
+          <AlertDialogAction onClick={() => handleAuthRedirect("/login")}>
+            Log In
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   return (
     <div className="space-y-12">
       <div>
@@ -18,10 +73,16 @@ export default function CustomArtPage() {
 
       <div className="grid lg:grid-cols-5 gap-12">
         <div className="lg:col-span-3">
-          <CustomArtForm />
+          <CustomArtForm
+            isLoggedIn={isLoggedIn}
+            onAuthRequired={() => setShowAuthDialog(true)}
+          />
         </div>
         <div className="lg:col-span-2">
-          <ArtIdeaGenerator />
+          <ArtIdeaGenerator
+            isLoggedIn={isLoggedIn}
+            onAuthRequired={() => setShowAuthDialog(true)}
+          />
         </div>
       </div>
 
@@ -61,6 +122,8 @@ export default function CustomArtPage() {
           </div>
         </div>
       </section>
+
+      <AuthPopup />
     </div>
   );
 }

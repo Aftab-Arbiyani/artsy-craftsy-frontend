@@ -50,7 +50,7 @@ export default function ProductDetailsPage() {
   const router = useRouter();
   const [product, setProduct] = useState<Product | undefined | null>(undefined);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState<string>("");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [artistProducts, setArtistProducts] = useState<Product[]>([]);
@@ -99,6 +99,10 @@ export default function ProductDetailsPage() {
               : "https://placehold.co/600x400.png",
           ) || ["https://placehold.co/600x400.png"];
 
+          const artistImage = apiProduct.user?.profile_picture
+            ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${apiProduct.user.profile_picture}`
+            : undefined;
+
           const transformedProduct: Product = {
             id: apiProduct.id,
             name: apiProduct.title,
@@ -112,7 +116,7 @@ export default function ProductDetailsPage() {
             artist: apiProduct.user?.name || "Unknown Artist",
             artistId: apiProduct.user?.id,
             artistBio: apiProduct.user?.bio,
-            artistImage: apiProduct.user?.profile_picture,
+            artistImage: artistImage,
             medium: apiProduct.materials?.name,
             dimensions:
               apiProduct.width && apiProduct.height
@@ -198,13 +202,8 @@ export default function ProductDetailsPage() {
   if (!product) return null;
 
   const handleAddToCart = () => {
-    if (!product.price) return; // Or handle it differently
+    if (!product.price) return;
     addItem(product as Product & { price: number });
-    toast({
-      title: "Added to Cart",
-      description: `${product.name} has been added to your cart.`,
-      variant: "success",
-    });
   };
 
   const handleBuyNow = () => {
@@ -215,10 +214,9 @@ export default function ProductDetailsPage() {
 
   const hasDiscount =
     !!product.discount && product.discount > 0 && product.price;
-  const discountedPrice =
-    hasDiscount && product.price !== undefined
-      ? product.price * (1 - (product.discount ?? 0) / 100)
-      : (product.price ?? 0);
+  const discountedPrice = hasDiscount
+    ? product.price * (1 - (product.discount ?? 0) / 100)
+    : product.price;
 
   const AuthPopup = ({
     children,
@@ -263,7 +261,11 @@ export default function ProductDetailsPage() {
             </div>
           )}
           <Image
-            src={selectedImage || (product.imageUrls && product.imageUrls[0])}
+            src={
+              selectedImage ||
+              (product.imageUrls && product.imageUrls[0]) ||
+              "https://placehold.co/600x400.png"
+            }
             alt={product.name}
             width={600}
             height={600}
@@ -382,21 +384,21 @@ export default function ProductDetailsPage() {
               <div className="space-y-8 sticky top-24">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16">
-                    <Image
+                    <AvatarImage
                       src={
-                        product.artistImage
-                          ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${product.artistImage}`
-                          : "https://placehold.co/64x64.png"
+                        product.artistImage ||
+                        "https://placehold.co/100x100.png"
                       }
                       alt={product.artist}
-                      width={64}
-                      height={64}
                       data-ai-hint="artist portrait"
                     />
                     <AvatarFallback>{product.artist.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div>
                     <h3 className="text-lg font-bold">{product.artist}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Kolkata, India
+                    </p>
                     {product.artistId && (
                       <Link
                         href={`/artist/${product.artistId}`}
@@ -416,15 +418,8 @@ export default function ProductDetailsPage() {
                 <div className="space-y-2">
                   <h3 className="text-lg font-bold">About Artist</h3>
                   <p className="text-muted-foreground text-sm">
-                    {product.artistBio && product.artistBio.length > 200 ? (
-                      <>
-                        <span>
-                          {product.artistBio.slice(0, 200)}...
-                        </span>
-                      </>
-                    ) : (
-                      product.artistBio
-                    )}
+                    {product.artistBio ||
+                      "This artist has not provided a bio yet."}
                   </p>
                 </div>
               </div>

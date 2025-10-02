@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -118,17 +119,24 @@ function DashboardComponent() {
           </Card>
         </Link>
 
-        <Link href="/dashboard/my-requests" passHref>
+        <Link
+          href={
+            isArtist ? "/seller/assigned-requests" : "/dashboard/my-requests"
+          }
+          passHref
+        >
           <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-xl font-medium font-headline">
-                My Custom Art Requests
+                {isArtist ? "Assigned Requests" : "My Custom Art Requests"}
               </CardTitle>
               <Edit3 className="h-6 w-6 text-accent" />
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Track the status of your custom art commissions.
+                {isArtist
+                  ? "View and respond to custom art commissions."
+                  : "Track the status of your custom art requests."}
               </p>
             </CardContent>
           </Card>
