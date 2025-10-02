@@ -28,8 +28,6 @@ import { useToast } from "@/hooks/use-toast";
 import { ImagePlus, Send, Loader2 } from "lucide-react";
 
 const customArtRequestSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Invalid email address." }),
   description: z
     .string()
     .min(20, { message: "Description must be at least 20 characters." })
@@ -57,13 +55,21 @@ const customArtRequestSchema = z.object({
         ),
       ".jpg, .jpeg, .png, .gif, .webp files are accepted.",
     ),
-  budget: z.string().optional(),
   dimensions: z.string().optional(),
+  budget_range: z.string().optional(),
 });
 
 type CustomArtFormValues = z.infer<typeof customArtRequestSchema>;
 
-export default function CustomArtForm() {
+interface CustomArtFormProps {
+  isLoggedIn: boolean;
+  onAuthRequired: () => void;
+}
+
+export default function CustomArtForm({
+  isLoggedIn,
+  onAuthRequired,
+}: CustomArtFormProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -71,11 +77,9 @@ export default function CustomArtForm() {
   const form = useForm<CustomArtFormValues>({
     resolver: zodResolver(customArtRequestSchema),
     defaultValues: {
-      name: "",
-      email: "",
       description: "",
-      budget: "",
       dimensions: "",
+      budget_range: "",
     },
   });
 
@@ -92,25 +96,116 @@ export default function CustomArtForm() {
     }
   };
 
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const formData = new FormData();
+    formData.append("image", file);
+    const token = localStorage.getItem("authToken");
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/upload/image`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        },
+      );
+      const result = await response.json();
+      if (response.ok && result.status === 1) {
+        return result.data.image;
+      } else {
+        toast({
+          title: "Image Upload Failed",
+          description: result.message || "Could not upload image.",
+          variant: "destructive",
+        });
+        return null;
+      }
+    } catch (error) {
+      toast({
+        title: "Network Error",
+        description: "Could not upload image.",
+        variant: "destructive",
+      });
+      return null;
+    }
+  };
+
   const onSubmit: SubmitHandler<CustomArtFormValues> = async (data) => {
+    if (!isLoggedIn) {
+      onAuthRequired();
+      return;
+    }
+
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log("Custom Art Request Data:", data);
 
-    // In a real app, you would send this data to your backend.
-    // If an image is present in data.referenceImage, you'd upload it.
-    // For now, we'll just log it and show a success toast.
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      toast({
+        title: "Authentication Error",
+        description: "You are not logged in.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
 
-    toast({
-      title: "Request Submitted!",
-      description:
-        "Thank you for your custom art request. We'll be in touch soon!",
-      variant: "success",
-    });
-    form.reset();
-    setImagePreview(null);
-    setIsLoading(false);
+    let imageUrl: string | null = null;
+    if (data.referenceImage && data.referenceImage.length > 0) {
+      imageUrl = await uploadImage(data.referenceImage[0]);
+      if (!imageUrl) {
+        setIsLoading(false);
+        return; // Stop submission if image upload fails
+      }
+    }
+
+    try {
+      const payload = {
+        description: data.description,
+        dimensions: data.dimensions,
+        budget_range: data.budget_range,
+        reference_image: imageUrl,
+      };
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/custom-art`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      const result = await response.json();
+
+      if (response.ok && result.status === 1) {
+        toast({
+          title: "Request Submitted!",
+          description: result.message || "We'll be in touch soon!",
+          variant: "success",
+        });
+        form.reset();
+        setImagePreview(null);
+      } else {
+        toast({
+          title: "Submission Failed",
+          description: result.message || "An unexpected error occurred.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Custom Art Request Error:", error);
+      toast({
+        title: "Network Error",
+        description: "Could not submit your request.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -127,39 +222,6 @@ export default function CustomArtForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Your Name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email Address</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="your.email@example.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
             <FormField
               control={form.control}
               name="description"
@@ -197,7 +259,7 @@ export default function CustomArtForm() {
               />
               <FormField
                 control={form.control}
-                name="budget"
+                name="budget_range"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Budget Range (Optional)</FormLabel>

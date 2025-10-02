@@ -129,7 +129,7 @@ function EditProductPageComponent() {
           <Link href={`/seller/edit-product/${artworkId}`} passHref>
             <Button>
               <Edit className="mr-2 h-4 w-4" />
-              Edit Artwork
+              Edit
             </Button>
           </Link>
         )}

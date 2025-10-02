@@ -24,12 +24,15 @@ export type CartItem = {
 
 export type CustomArtRequest = {
   id: string;
+  requestId?: string;
   description: string;
-  imageUrl?: string;
-  status: "Pending" | "In Progress" | "Completed" | "Cancelled";
+  reference_image?: string;
+  budget_range?: string;
+  dimensions?: string;
+  status: string;
   createdAt: Date;
-  userName?: string; // Assuming user context might provide this
-  userEmail?: string;
+  reply?: string;
+  price?: string;
 };
 
 export interface Category {
@@ -38,3 +41,17 @@ export interface Category {
   slug: string;
   image: string;
 }
+
+export type AssignedArtRequest = {
+  id: string;
+  created_at: string;
+  dimensions: string | null;
+  request_id: string;
+  description: string;
+  budget_range: string | null;
+  reference_image: string | null;
+  reply: string | null;
+  status: "requested" | "replied" | "accepted" | "rejected";
+  price: string;
+  amount_receivable: string;
+};

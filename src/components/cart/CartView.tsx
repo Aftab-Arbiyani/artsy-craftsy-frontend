@@ -26,21 +26,10 @@ export default function CartView() {
     getTotalPrice,
     clearCart,
     getItemCount,
+    isLoaded,
   } = useCart();
-  const [isLoading, setIsLoading] = useState(true); // For overall cart view, items themselves rely on CartProvider state
 
-  // Simulate initial loading for the cart page appearance if needed,
-  // but actual item loading is handled by CartProvider's localStorage effect.
-  // This loading state is more for the page structure itself if it were complex.
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500); // Short delay for cart, as items load from localStorage quickly
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    // Show skeleton for the whole cart structure including summary
+  if (!isLoaded) {
     return (
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
@@ -118,78 +107,104 @@ export default function CartView() {
             </Button>
           </CardTitle>
         </CardHeader>
-        {items.map((item) => (
-          <Card
-            key={item.product.id}
-            className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 shadow-sm"
-          >
-            <div className="relative w-full sm:w-24 h-32 sm:h-24 aspect-square rounded-md overflow-hidden shrink-0">
-              <Image
-                src={item.product.imageUrls[0]}
-                alt={item.product.name}
-                fill
-                sizes="100px"
-                className="object-cover"
-                data-ai-hint={item.product.dataAiHint || "cart item"}
-              />
-            </div>
-            <div className="flex-grow">
-              <Link
-                href={`/products/${item.product.id}`}
-                className="hover:underline"
-              >
-                <h3 className="font-headline text-lg font-semibold">
-                  {item.product.name}
-                </h3>
-              </Link>
-              <p className="text-sm text-muted-foreground">
-                {item.product.category}
-              </p>
-              <p className="text-md font-semibold mt-1">
-                ₹{item.product.price.toLocaleString("en-IN")}
-              </p>
-            </div>
-            <div className="flex items-center space-x-2 sm:ml-auto shrink-0">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() =>
-                  updateQuantity(item.product.id, item.quantity - 1)
-                }
-                className="h-8 w-8"
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-              <Input
-                type="number"
-                value={item.quantity}
-                onChange={(e) =>
-                  updateQuantity(item.product.id, parseInt(e.target.value))
-                }
-                className="h-8 w-14 text-center hide-arrows [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                min="1"
-              />
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() =>
-                  updateQuantity(item.product.id, item.quantity + 1)
-                }
-                className="h-8 w-8"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => removeItem(item.product.id)}
-                className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 w-8"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </Card>
-        ))}
+        {items.map((item) => {
+          const hasDiscount =
+            item.product.discount && item.product.discount > 0;
+          const discountedPrice = hasDiscount
+            ? item.product.price * (1 - (item.product.discount ?? 0) / 100)
+            : item.product.price;
+
+          return (
+            <Card
+              key={item.product.id}
+              className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 shadow-sm"
+            >
+              <div className="relative w-full sm:w-24 h-32 sm:h-24 aspect-square rounded-md overflow-hidden shrink-0">
+                <Image
+                  src={item.product.imageUrls[0]}
+                  alt={item.product.name}
+                  fill
+                  sizes="100px"
+                  className="object-cover"
+                  data-ai-hint={item.product.dataAiHint || "cart item"}
+                />
+              </div>
+              <div className="flex-grow">
+                <Link
+                  href={`/products/${item.product.id}`}
+                  className="hover:underline"
+                >
+                  <h3 className="font-headline text-lg font-semibold">
+                    {item.product.name}
+                  </h3>
+                </Link>
+                {item.product.artist && (
+                  <p className="text-sm text-muted-foreground">
+                    by {item.product.artist}
+                  </p>
+                )}
+                {item.product.medium && (
+                  <p className="text-sm text-muted-foreground">
+                    {item.product.medium}
+                  </p>
+                )}
+
+                <div className="flex items-baseline gap-2 mt-1">
+                  <p className="text-md font-semibold">
+                    ₹{discountedPrice.toLocaleString("en-IN")}
+                  </p>
+                  {hasDiscount && (
+                    <p className="text-sm text-muted-foreground line-through">
+                      ₹{item.product.price.toLocaleString("en-IN")}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center space-x-2 sm:ml-auto shrink-0">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() =>
+                    updateQuantity(item.product.id, item.quantity - 1)
+                  }
+                  className="h-8 w-8"
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  type="number"
+                  value={item.quantity}
+                  onChange={(e) => {
+                    const newQuantity = parseInt(e.target.value);
+                    if (!isNaN(newQuantity)) {
+                      updateQuantity(item.product.id, newQuantity);
+                    }
+                  }}
+                  className="h-8 w-14 text-center hide-arrows [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  min="1"
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() =>
+                    updateQuantity(item.product.id, item.quantity + 1)
+                  }
+                  className="h-8 w-8"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeItem(item.product.id)}
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 w-8"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </Card>
+          );
+        })}
       </div>
 
       <div className="lg:col-span-1">
