@@ -215,8 +215,8 @@ export default function ProductDetailsPage() {
   const hasDiscount =
     !!product.discount && product.discount > 0 && product.price;
   const discountedPrice = hasDiscount
-    ? product.price * (1 - (product.discount ?? 0) / 100)
-    : product.price;
+    ? (product.price ?? 0) * (1 - (product.discount ?? 0) / 100)
+    : (product.price ?? 0);
 
   const AuthPopup = ({
     children,
