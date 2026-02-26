@@ -115,7 +115,7 @@ export default function ArtIdeaGenerator({
           Generator
         </CardTitle>
         <CardDescription>
-          Need inspiration? Describe your vision, upload an reference
+          Need inspiration? Describe your vision, upload an optional reference
           image, and let our AI suggest some creative art ideas!
         </CardDescription>
       </CardHeader>

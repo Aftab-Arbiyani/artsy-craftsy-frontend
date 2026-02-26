@@ -1,14 +1,12 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import Logo from "../shared/Logo";
 import { Separator } from "@/components/ui/separator";
-import { useState, useEffect } from "react";
+import { Icons } from "@/components/shared/Icons";
+import { useEffect, useState } from "react";
 import type { Category } from "@/lib/types";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "../ui/skeleton";
 
 interface Artist {
   id: string;
@@ -21,36 +19,38 @@ const Footer = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
+    const fetchFooterData = async () => {
       try {
-        const [categoryResponse, artistResponse] = await Promise.all([
+        setIsLoading(true);
+        const [categoriesResponse, artistsResponse] = await Promise.all([
           fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/category?take=6&skip=0`,
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/category?take=4&skip=0`,
           ),
           fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/artists-dropdown?take=6&skip=0`,
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/artists-dropdown?take=4&skip=0`,
           ),
         ]);
 
-        const categoryResult = await categoryResponse.json();
+        // Handle Categories
+        const categoriesResult = await categoriesResponse.json();
         if (
-          categoryResponse.ok &&
-          categoryResult.status === 1 &&
-          Array.isArray(categoryResult.data)
+          categoriesResponse.ok &&
+          categoriesResult.status === 1 &&
+          Array.isArray(categoriesResult.data)
         ) {
-          setCategories(categoryResult.data);
+          setCategories(categoriesResult.data);
         } else {
           setCategories([]);
         }
 
-        const artistResult = await artistResponse.json();
+        // Handle Artists
+        const artistsResult = await artistsResponse.json();
         if (
-          artistResponse.ok &&
-          artistResult.status === 1 &&
-          Array.isArray(artistResult.data)
+          artistsResponse.ok &&
+          artistsResult.status === 1 &&
+          Array.isArray(artistsResult.data)
         ) {
-          setArtists(artistResult.data);
+          setArtists(artistsResult.data);
         } else {
           setArtists([]);
         }
@@ -63,30 +63,51 @@ const Footer = () => {
       }
     };
 
-    fetchData();
+    fetchFooterData();
   }, []);
 
   return (
     <footer className="bg-card border-t border-border mt-auto">
       <div className="container mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <div className="flex justify-center mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          {/* Left Section */}
+          <div className="md:col-span-4 lg:col-span-3 space-y-4">
             <Logo />
+            <p className="text-sm text-muted-foreground">
+              A premier platform for discovering, buying, and commissioning
+              unique artwork from talented artists.
+            </p>
+            <div className="flex space-x-3">
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-primary"
+              >
+                <Icons.twitter className="h-5 w-5" />
+              </Link>
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-primary"
+              >
+                <Icons.linkedin className="h-5 w-5" />
+              </Link>
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-primary"
+              >
+                <Icons.instagram className="h-5 w-5" />
+              </Link>
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-primary"
+              >
+                <Icons.youtube className="h-5 w-5" />
+              </Link>
+            </div>
           </div>
-          <p className="mt-4 text-sm text-muted-foreground max-w-4xl mx-auto">
-            ArtsyCraftsy is India&apos;s leading online art platform, offering
-            an exclusive collection of curated Indian art paintings. Discover
-            and buy original paintings online in India, with ease and
-            convenience, powered by innovative technology and seamless
-            transactions.
-          </p>
-        </div>
 
-        <Separator className="my-8" />
-
-        <div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-8 text-left">
-            <div className="col-span-1">
+          {/* Right Section */}
+          <div className="md:col-span-8 lg:col-span-9 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
+            <div>
               <h3 className="font-semibold text-foreground mb-4">
                 FOR COLLECTORS
               </h3>
@@ -96,27 +117,35 @@ const Footer = () => {
                     href="#"
                     className="text-muted-foreground hover:text-primary"
                   >
-                    Collector&apos;s FAQ
+                    Collector's FAQ
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/products"
                     className="text-muted-foreground hover:text-primary"
                   >
-                    Resell Works
+                    Browse Art
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/custom-art"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Custom Art
                   </Link>
                 </li>
               </ul>
             </div>
-            <div className="col-span-1">
+            <div>
               <h3 className="font-semibold text-foreground mb-4">
-                FOR SELLERS
+                FOR ARTISTS
               </h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link
-                    href="/seller/my-artworks"
+                    href="/signup?type=artist"
                     className="text-muted-foreground hover:text-primary"
                   >
                     Sell Your Art
@@ -127,19 +156,24 @@ const Footer = () => {
                     href="#"
                     className="text-muted-foreground hover:text-primary"
                   >
-                    Seller&apos;s FAQ
+                    Seller's FAQ
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/seller/my-artworks"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    My Artworks
                   </Link>
                 </li>
               </ul>
             </div>
-
             <div>
-              <h3 className="font-semibold text-foreground mb-4">
-                ART CATEGORY
-              </h3>
+              <h3 className="font-semibold text-foreground mb-4">CATEGORIES</h3>
               <ul className="space-y-2 text-sm">
                 {isLoading
-                  ? Array.from({ length: 6 }).map((_, index) => (
+                  ? Array.from({ length: 4 }).map((_, index) => (
                       <li key={index}>
                         <Skeleton className="h-4 w-3/4" />
                       </li>
@@ -156,12 +190,11 @@ const Footer = () => {
                     ))}
               </ul>
             </div>
-
             <div>
               <h3 className="font-semibold text-foreground mb-4">ARTISTS</h3>
               <ul className="space-y-2 text-sm">
                 {isLoading
-                  ? Array.from({ length: 6 }).map((_, index) => (
+                  ? Array.from({ length: 4 }).map((_, index) => (
                       <li key={index}>
                         <Skeleton className="h-4 w-3/4" />
                       </li>
@@ -169,7 +202,7 @@ const Footer = () => {
                   : artists.map((artist) => (
                       <li key={artist.id}>
                         <Link
-                          href={`/products?artist=${artist.id}`}
+                          href={`/artist/${artist.id}`}
                           className="text-muted-foreground hover:text-primary"
                         >
                           {artist.name}
@@ -178,32 +211,15 @@ const Footer = () => {
                     ))}
               </ul>
             </div>
-
             <div>
-              <h3 className="font-semibold text-foreground mb-4">ABOUT</h3>
+              <h3 className="font-semibold text-foreground mb-4">COMPANY</h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link
                     href="#"
                     className="text-muted-foreground hover:text-primary"
                   >
-                    The Team
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="text-muted-foreground hover:text-primary"
-                  >
-                    Testimonials
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="text-muted-foreground hover:text-primary"
-                  >
-                    Work With Us
+                    About Us
                   </Link>
                 </li>
                 <li>
@@ -211,7 +227,7 @@ const Footer = () => {
                     href="/contact"
                     className="text-muted-foreground hover:text-primary"
                   >
-                    Contact Us
+                    Contact
                   </Link>
                 </li>
                 <li>
@@ -219,15 +235,7 @@ const Footer = () => {
                     href="#"
                     className="text-muted-foreground hover:text-primary"
                   >
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="text-muted-foreground hover:text-primary"
-                  >
-                    Terms & Conditions
+                    Careers
                   </Link>
                 </li>
               </ul>
@@ -235,10 +243,20 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
+        <Separator className="my-8" />
+
+        <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground">
           <p>
             &copy; {new Date().getFullYear()} ArtsyCraftsy. All rights reserved.
           </p>
+          <div className="flex space-x-4 mt-2 sm:mt-0">
+            <Link href="#" className="hover:text-primary">
+              Privacy Policy
+            </Link>
+            <Link href="#" className="hover:text-primary">
+              Terms & Conditions
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

@@ -18,6 +18,8 @@ import {
   Image as ImageIcon,
   Loader2,
   MoreHorizontal,
+  Eye,
+  Download,
 } from "lucide-react";
 import type { AssignedArtRequest } from "@/lib/types";
 import { useState, useEffect, useCallback } from "react";
@@ -134,6 +136,67 @@ export default function AssignedRequestsPage() {
     fetchRequests(currentPage); // Re-fetch to show updated status
   };
 
+  const handleDownloadImage = async (imagePath: string | null) => {
+    if (!imagePath) {
+      toast({
+        title: "No Image",
+        description: "There is no image to download for this request.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      toast({
+        title: "Unauthorized",
+        description: "Please log in to download the image.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // 1. Get the signed URL from your backend
+      const getFileResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/upload/get-file`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ filepath: imagePath }),
+        },
+      );
+
+      const getFileResult = await getFileResponse.json();
+
+      if (!getFileResponse.ok || getFileResult.status !== 1) {
+        throw new Error(getFileResult.message || "Failed to get download URL.");
+      }
+
+      const signedUrl = getFileResult.data.url;
+
+      // 2. Open the signed URL in a new tab
+      window.open(signedUrl, "_blank");
+      toast({
+        title: "Success",
+        description: "Image is opening in a new tab.",
+        variant: "success",
+      });
+    } catch (error: any) {
+      console.error("Download error:", error);
+      toast({
+        title: "Download Failed",
+        description:
+          error.message ||
+          "Could not download the image. The URL might be expired or invalid.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const totalPages = Math.ceil(totalRequests / REQUESTS_PER_PAGE);
 
   return (
@@ -193,7 +256,11 @@ export default function AssignedRequestsPage() {
               </TableHeader>
               <TableBody>
                 {requests.map((request) => (
-                  <TableRow key={request.id}>
+                  <TableRow
+                    key={request.id}
+                    onClick={() => handleViewDetails(request.id)}
+                    className="cursor-pointer"
+                  >
                     <TableCell>
                       <div className="relative h-16 w-16 rounded-md overflow-hidden border">
                         <Image
@@ -242,7 +309,10 @@ export default function AssignedRequestsPage() {
                         {STATUS_MAP[request.status]?.text || request.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell
+                      className="text-right"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -252,13 +322,22 @@ export default function AssignedRequestsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={() => handleViewDetails(request.id)}
+                            onSelect={() => handleViewDetails(request.id)}
                           >
+                            <Eye className="mr-2 h-4 w-4" />
                             View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onSelect={() =>
+                              handleDownloadImage(request.reference_image)
+                            }
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            Download Image
                           </DropdownMenuItem>
                           {request.status === "requested" && (
                             <DropdownMenuItem
-                              onClick={() => handleSendQuote(request.id)}
+                              onSelect={() => handleSendQuote(request.id)}
                             >
                               Send Quote
                             </DropdownMenuItem>

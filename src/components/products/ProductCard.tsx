@@ -48,12 +48,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
   }, []);
 
   const handleAddToCart = () => {
-    addItem({ ...product, price: product.price ?? 0 });
-    toast({
-      title: "Added to Cart",
-      description: `${product.name} has been added to your cart.`,
-      variant: "success",
-    });
+    if (!product.price) return;
+    addItem(product as Product & { price: number });
   };
 
   const handleAuthRedirect = (path: string) => {
@@ -67,10 +63,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
       : "https://placehold.co/600x400.png";
   const discountValue = product.discount ?? 0;
   const hasDiscount = discountValue > 0;
-  const priceValue = product.price ?? 0;
-  const discountedPrice = hasDiscount
-    ? priceValue * (1 - discountValue / 100)
-    : priceValue;
+  const discountedPrice =
+    hasDiscount && product.price
+      ? product.price * (1 - discountValue / 100)
+      : product.price;
 
   return (
     <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
@@ -120,12 +116,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
       </CardContent>
       <CardFooter className="p-3 pt-0 flex justify-between items-center gap-2">
         <div className="flex flex-col items-start">
-          <p className="font-semibold text-base text-primary">
-            ₹{discountedPrice.toLocaleString("en-IN")}
-          </p>
-          {hasDiscount && (
+          {discountedPrice && (
+            <p className="font-semibold text-base text-primary">
+              ₹{discountedPrice.toLocaleString("en-IN")}
+            </p>
+          )}
+          {hasDiscount && product.price && (
             <p className="text-xs text-muted-foreground line-through">
-              ₹{(product.price ?? 0).toLocaleString("en-IN")}
+              ₹{product.price.toLocaleString("en-IN")}
             </p>
           )}
         </div>
