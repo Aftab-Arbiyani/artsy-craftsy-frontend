@@ -189,7 +189,7 @@ function SignupFormComponent() {
           {/* Adjust this height as needed */}
           <div className="absolute inset-0 overflow-hidden">
             <Image
-              src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}public/images/login.jpg`}
+              src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}category/login.jpg`}
               alt="Two Friends by Varsha Kharatmal"
               fill
               priority

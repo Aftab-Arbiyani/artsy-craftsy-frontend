@@ -128,7 +128,7 @@ export default function LoginPage() {
           {/* Adjust this height as needed */}
           <div className="absolute inset-0 overflow-hidden">
             <Image
-              src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}public/images/login.jpg`}
+              src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}category/login.jpg`}
               alt="Two Friends by Varsha Kharatmal"
               fill
               priority
@@ -154,7 +154,7 @@ export default function LoginPage() {
               <h1 className="text-2xl font-bold">Login With ArtsyCraftsy</h1>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
+            {/* <div className="grid grid-cols-1 gap-4">
               <Button
                 variant="outline"
                 className="hover:bg-background hover:text-foreground"
@@ -162,7 +162,7 @@ export default function LoginPage() {
                 <Icons.google className="mr-2 h-4 w-4" />
                 Login with Google
               </Button>
-            </div>
+            </div> */}
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -170,7 +170,7 @@ export default function LoginPage() {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground">
-                  Or Login Using Email
+                  Login Using Email
                 </span>
               </div>
             </div>

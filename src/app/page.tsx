@@ -126,7 +126,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative h-[500px] w-full flex items-center justify-center rounded-lg overflow-hidden shadow-lg">
         <Image
-          src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || ""}public/images/hero-section.png`}
+          src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || ""}banners/hero-section.png`}
           alt="Artistic background"
           fill
           className="object-cover"
@@ -325,7 +325,7 @@ export default function Home() {
       {/* Custom Art / Artist CTA */}
       <section className="relative h-80 w-full rounded-lg overflow-hidden shadow-lg">
         <Image
-          src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || ""}public/images/banner.png`}
+          src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL || ""}banners/why-choose-us.png`}
           alt="Artistic background banner"
           fill
           className="object-cover"
