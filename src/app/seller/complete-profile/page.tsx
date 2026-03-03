@@ -305,7 +305,7 @@ function CompleteProfilePageComponent() {
               : undefined;
 
             if (profileData.profile_picture) {
-              const imageUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${profileData.profile_picture}`;
+              const imageUrl = `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${profileData.profile_picture}`;
               setImagePreview(imageUrl);
               setProfilePictureUrl(profileData.profile_picture);
             }
@@ -365,6 +365,7 @@ function CompleteProfilePageComponent() {
 
     const formData = new FormData();
     formData.append("image", file);
+    formData.append("folder", "profiles");
 
     const token = localStorage.getItem("authToken");
     if (!token) {
@@ -401,7 +402,7 @@ function CompleteProfilePageComponent() {
       } else {
         setImagePreview(
           profilePictureUrl
-            ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/${profilePictureUrl}`
+            ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${profilePictureUrl}`
             : null,
         ); // Revert preview on fail
         toast({
@@ -414,7 +415,7 @@ function CompleteProfilePageComponent() {
       console.error("Image upload error:", error);
       setImagePreview(
         profilePictureUrl
-          ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/${profilePictureUrl}`
+          ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${profilePictureUrl}`
           : null,
       );
       toast({

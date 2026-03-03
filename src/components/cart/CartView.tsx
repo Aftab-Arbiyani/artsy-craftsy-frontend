@@ -16,7 +16,8 @@ import { Trash2, ShoppingBag, Minus, Plus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import CartItemSkeleton from "@/components/skeletons/CartItemSkeleton";
-import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { usePageTransition } from "@/context/PageTransitionProvider";
 
 export default function CartView() {
   const {
@@ -28,6 +29,20 @@ export default function CartView() {
     getItemCount,
     isLoaded,
   } = useCart();
+  const router = useRouter();
+  const { startTransition } = usePageTransition();
+
+  const handleCheckoutClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    startTransition();
+    router.push("/checkout");
+  };
+
+  const subtotal = items.reduce(
+    (acc, item) => acc + item.product.price * item.quantity,
+    0,
+  );
+  const totalDiscount = subtotal - getTotalPrice();
 
   if (!isLoaded) {
     return (
@@ -217,27 +232,37 @@ export default function CartView() {
           <CardContent className="space-y-4">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>₹{getTotalPrice().toLocaleString("en-IN")}</span>
+              <span>₹{subtotal.toLocaleString("en-IN")}</span>
             </div>
+            {totalDiscount > 0 && (
+              <div className="flex justify-between text-success">
+                <span>Discount</span>
+                <span>- ₹{totalDiscount.toLocaleString("en-IN")}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span>Shipping</span>
               <span>Free</span>
             </div>
             <Separator />
             <div className="flex justify-between font-bold text-xl">
-              <span>Total</span>
+              <span>
+                Total{" "}
+                <span className="text-xs font-normal text-muted-foreground">
+                  (incl. of all taxes)
+                </span>
+              </span>
               <span>₹{getTotalPrice().toLocaleString("en-IN")}</span>
             </div>
           </CardContent>
           <CardFooter className="flex-col gap-2">
-            <Link href="/checkout" passHref className="w-full">
-              <Button
-                size="lg"
-                className="w-full bg-primary hover:bg-primary/90"
-              >
-                Proceed to Checkout
-              </Button>
-            </Link>
+            <Button
+              size="lg"
+              className="w-full bg-primary hover:bg-primary/90"
+              onClick={handleCheckoutClick}
+            >
+              Proceed to Checkout
+            </Button>
             <Link href="/products" passHref className="w-full">
               <Button variant="outline" className="w-full">
                 Continue Shopping

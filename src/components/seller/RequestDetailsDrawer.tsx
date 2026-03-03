@@ -11,7 +11,7 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, AlertTriangle, Send } from "lucide-react";
+import { Loader2, AlertTriangle, Send, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -135,6 +135,65 @@ export default function RequestDetailsDrawer({
     }
   };
 
+  const handleDownloadImage = async (imagePath: string | null) => {
+    if (!imagePath) {
+      toast({
+        title: "No Image",
+        description: "There is no image to download for this request.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      toast({
+        title: "Unauthorized",
+        description: "Please log in to download the image.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const getFileResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/upload/get-file`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ filepath: imagePath }),
+        },
+      );
+
+      const getFileResult = await getFileResponse.json();
+
+      if (!getFileResponse.ok || getFileResult.status !== 1) {
+        throw new Error(getFileResult.message || "Failed to get download URL.");
+      }
+
+      const signedUrl = getFileResult.data.url;
+
+      window.open(signedUrl, "_blank");
+      toast({
+        title: "Success",
+        description: "Image is opening in a new tab.",
+        variant: "success",
+      });
+    } catch (error: any) {
+      console.error("Download error:", error);
+      toast({
+        title: "Download Failed",
+        description:
+          error.message ||
+          "Could not download the image. The URL might be expired or invalid.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className="sm:max-w-lg w-[90vw] overflow-y-auto flex flex-col">
@@ -170,7 +229,7 @@ export default function RequestDetailsDrawer({
                   <h3 className="text-base font-semibold text-foreground">
                     Reference Image
                   </h3>
-                  <div className="relative aspect-video w-full rounded-md overflow-hidden border">
+                  <div className="relative aspect-video w-full rounded-md overflow-hidden border group">
                     <Image
                       src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${details.reference_image}`}
                       alt="Reference"
@@ -178,6 +237,17 @@ export default function RequestDetailsDrawer({
                       sizes="100%"
                       className="object-contain"
                     />
+                    <div className="absolute top-2 right-2 transition-opacity">
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        onClick={() =>
+                          handleDownloadImage(details.reference_image)
+                        }
+                      >
+                        <Download className="h-5 w-5" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}

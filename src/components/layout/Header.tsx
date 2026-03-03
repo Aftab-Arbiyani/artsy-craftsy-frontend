@@ -87,17 +87,36 @@ const Header = () => {
     setIsMobileSearchOpen(false);
   }, [pathname]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     startTransition();
+    const token = localStorage.getItem("authToken");
+
+    if (token) {
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/logout`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        // We can proceed with client-side logout even if API fails,
+        // as the token will be invalid anyway.
+      } catch (error) {
+        console.error("Logout API call failed:", error);
+      }
+    }
+
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
     setIsLoggedIn(false);
     setUserType(null);
+
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out.",
       variant: "success",
     });
+
     router.push("/login");
     router.refresh();
   };

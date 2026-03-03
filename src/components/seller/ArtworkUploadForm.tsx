@@ -413,6 +413,7 @@ export default function ArtworkUploadForm({
   const uploadImage = async (file: File) => {
     const formData = new FormData();
     formData.append("image", file);
+    formData.append("folder", "products");
 
     const token = localStorage.getItem("authToken");
     if (!token) {

@@ -41,7 +41,22 @@ function DashboardComponent() {
     }
   }, [router]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (token) {
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/logout`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } catch (error) {
+        console.error("Logout API call failed:", error);
+      }
+    }
+
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
     toast({
@@ -50,6 +65,7 @@ function DashboardComponent() {
       variant: "success",
     });
     router.push("/login");
+    router.refresh();
   };
 
   if (!user) {
@@ -136,7 +152,7 @@ function DashboardComponent() {
               <p className="text-sm text-muted-foreground">
                 {isArtist
                   ? "View and respond to custom art commissions."
-                  : "Track the status of your custom art requests."}
+                  : "Track the status of your custom art commissions."}
               </p>
             </CardContent>
           </Card>

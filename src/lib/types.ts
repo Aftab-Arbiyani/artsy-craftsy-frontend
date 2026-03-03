@@ -55,3 +55,13 @@ export type AssignedArtRequest = {
   price: string;
   amount_receivable: string;
 };
+
+export interface Address {
+  id: string;
+  street: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  country: string;
+  type: "home" | "work" | "other";
+}

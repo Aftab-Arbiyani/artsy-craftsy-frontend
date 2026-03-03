@@ -99,6 +99,7 @@ export default function CustomArtForm({
   const uploadImage = async (file: File): Promise<string | null> => {
     const formData = new FormData();
     formData.append("image", file);
+    formData.append("folder", "products");
     const token = localStorage.getItem("authToken");
 
     try {
