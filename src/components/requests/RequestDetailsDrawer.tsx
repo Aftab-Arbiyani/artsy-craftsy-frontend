@@ -27,6 +27,9 @@ import { Loader2, AlertTriangle, ShoppingCart, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { usePageTransition } from "@/context/PageTransitionProvider";
+import type { Product } from "@/lib/types";
 
 interface RequestDetailsDrawerProps {
   requestId: string | null;
@@ -83,6 +86,8 @@ export default function RequestDetailsDrawer({
   const [details, setDetails] = useState<RequestDetails | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
+  const { startTransition } = usePageTransition();
 
   useEffect(() => {
     if (requestId && open) {
@@ -144,6 +149,38 @@ export default function RequestDetailsDrawer({
     if (!isOpen) {
       setDetails(null); // Clear details when closing
     }
+  };
+
+  const handlePlaceOrder = () => {
+    if (!details || !details.price || parseFloat(details.price) <= 0) {
+      toast({
+        title: "Cannot Place Order",
+        description: "A valid price has not been quoted for this request.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const customOrderItem: Product & { price: number } = {
+      id: details.id,
+      name: `Custom Artwork Request - ${details.request_id}`,
+      description: details.description,
+      price: parseFloat(details.price),
+      imageUrls: details.reference_image
+        ? [
+            `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${details.reference_image}`,
+          ]
+        : ["https://placehold.co/600x400.png"],
+      category: "Custom Artwork",
+      // The backend will know this is a custom order, so some fields can be generic
+    };
+
+    // Use sessionStorage to pass the item to the custom checkout page
+    sessionStorage.setItem("customOrderItem", JSON.stringify(customOrderItem));
+
+    startTransition();
+    router.push("/checkout/custom");
+    onOpenChange(false);
   };
 
   const handleDeleteRequest = async () => {
@@ -297,7 +334,7 @@ export default function RequestDetailsDrawer({
         {details && (
           <SheetFooter className="mt-auto pt-4 border-t space-y-2 sm:space-y-0 sm:flex sm:flex-col sm:gap-2">
             {details.status === "replied" && (
-              <Button className="w-full">
+              <Button className="w-full" onClick={handlePlaceOrder}>
                 <ShoppingCart className="mr-2 h-4 w-4" />
                 Place Order
               </Button>

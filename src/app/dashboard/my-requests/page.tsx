@@ -196,7 +196,11 @@ function MyRequestsComponent() {
                 </TableHeader>
                 <TableBody>
                   {requests.map((request) => (
-                    <TableRow key={request.id}>
+                    <TableRow
+                      key={request.id}
+                      onClick={() => handleViewDetails(request.id)}
+                      className="cursor-pointer"
+                    >
                       <TableCell>
                         <div className="relative h-16 w-16 rounded-md overflow-hidden border">
                           <Image
@@ -238,7 +242,10 @@ function MyRequestsComponent() {
                           {STATUS_MAP[request.status]?.text || request.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell
+                        className="text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -254,7 +261,36 @@ function MyRequestsComponent() {
                               View Details
                             </DropdownMenuItem>
                             {request.status === "replied" && (
-                              <DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={() => {
+                                  if (
+                                    !request.price ||
+                                    parseFloat(request.price) <= 0
+                                  )
+                                    return;
+                                  const customOrderItem: any = {
+                                    id: request.id,
+                                    name: `Request Id #${request.requestId}`,
+                                    description: request.description,
+                                    price: parseFloat(request.price),
+                                    imageUrls: request.reference_image
+                                      ? [
+                                          `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${request.reference_image}`,
+                                        ]
+                                      : ["https://placehold.co/600x400.png"],
+                                    category: "Custom Artwork",
+                                  };
+                                  sessionStorage.setItem(
+                                    "customOrderItem",
+                                    JSON.stringify(customOrderItem),
+                                  );
+                                  router.push("/checkout/custom");
+                                }}
+                                disabled={
+                                  !request.price ||
+                                  parseFloat(request.price) <= 0
+                                }
+                              >
                                 <ShoppingCart className="mr-2 h-4 w-4" />
                                 Place Order
                               </DropdownMenuItem>
