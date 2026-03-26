@@ -18,10 +18,15 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  SlidersHorizontal,
+  Tag,
+  User,
+  Check,
+  IndianRupee,
+  LayoutTemplate,
 } from "lucide-react";
 import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -428,193 +433,296 @@ function ProductsPageComponent() {
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
       {/* Filters Sidebar */}
       <aside className="lg:col-span-1 lg:sticky top-24">
-        <Card className="p-4">
-          <CardContent className="p-0">
-            <Accordion type="multiple" className="w-full">
-              <AccordionItem value="category">
-                <AccordionTrigger className="text-base font-semibold py-2">
+        <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b bg-muted/40">
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4 text-primary" />
+              <span className="font-semibold text-sm">Filters</span>
+              {(activeFilters.length > 0 || isPriceFilterActive) && (
+                <span className="bg-primary text-primary-foreground text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
+                  {activeFilters.length + (isPriceFilterActive ? 1 : 0)}
+                </span>
+              )}
+            </div>
+            {(activeFilters.length > 0 || isPriceFilterActive) && (
+              <button
+                onClick={clearAllFilters}
+                className="text-xs text-muted-foreground hover:text-destructive transition-colors font-medium"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+
+          <Accordion
+            type="multiple"
+            defaultValue={["category", "artist", "orientation", "price"]}
+            className="w-full"
+          >
+            {/* Category */}
+            <AccordionItem value="category" className="border-b">
+              <AccordionTrigger className="px-5 py-3 text-sm font-semibold hover:no-underline hover:bg-muted/30">
+                <div className="flex items-center gap-2 flex-1">
+                  <Tag className="h-3.5 w-3.5 text-muted-foreground" />
                   Category
-                </AccordionTrigger>
-                <AccordionContent className="pt-2">
-                  <div className="space-y-2 pr-2">
-                    {allCategories.length === 0
-                      ? Array.from({ length: 4 }).map((_, i) => (
-                          <div key={i} className="flex items-center space-x-2">
-                            <Skeleton className="h-4 w-4" />
-                            <Skeleton className="h-4 w-3/4" />
-                          </div>
-                        ))
-                      : allCategories.map((category) => (
-                          <div
+                  {selectedCategories.length > 0 && (
+                    <span className="bg-primary text-primary-foreground text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
+                      {selectedCategories.length}
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-3 pb-3">
+                <div className="space-y-0.5">
+                  {allCategories.length === 0
+                    ? Array.from({ length: 4 }).map((_, i) => (
+                        <Skeleton key={i} className="h-9 w-full rounded-lg" />
+                      ))
+                    : allCategories.map((category) => {
+                        const isSelected = selectedCategories.includes(
+                          category.id,
+                        );
+                        return (
+                          <button
                             key={category.id}
-                            className="flex items-center space-x-2"
+                            onClick={() =>
+                              handleCategoryChange(category.id, !isSelected)
+                            }
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all ${
+                              isSelected
+                                ? "bg-primary/10 text-primary font-semibold"
+                                : "hover:bg-muted text-foreground"
+                            }`}
                           >
-                            <Checkbox
-                              id={`cat-${category.id}`}
-                              checked={selectedCategories.includes(category.id)}
-                              onCheckedChange={(checked) =>
-                                handleCategoryChange(category.id, !!checked)
-                              }
-                            />
-                            <label
-                              htmlFor={`cat-${category.id}`}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              {category.name}
-                            </label>
-                          </div>
-                        ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
+                            <span>{category.name}</span>
+                            {isSelected && (
+                              <Check className="h-3.5 w-3.5 shrink-0" />
+                            )}
+                          </button>
+                        );
+                      })}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
 
-              <AccordionItem value="artist">
-                <AccordionTrigger className="text-base font-semibold py-2">
+            {/* Artist */}
+            <AccordionItem value="artist" className="border-b">
+              <AccordionTrigger className="px-5 py-3 text-sm font-semibold hover:no-underline hover:bg-muted/30">
+                <div className="flex items-center gap-2 flex-1">
+                  <User className="h-3.5 w-3.5 text-muted-foreground" />
                   Artist
-                </AccordionTrigger>
-                <AccordionContent className="pt-2">
-                  <div className="space-y-2 pr-2">
-                    {allArtists.length === 0 && !isLoadingMoreArtists
-                      ? Array.from({ length: 4 }).map((_, i) => (
-                          <div key={i} className="flex items-center space-x-2">
-                            <Skeleton className="h-4 w-4" />
-                            <Skeleton className="h-4 w-3/4" />
-                          </div>
-                        ))
-                      : allArtists.map((artist) => (
-                          <div
+                  {selectedArtists.length > 0 && (
+                    <span className="bg-primary text-primary-foreground text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
+                      {selectedArtists.length}
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-3 pb-3">
+                <div className="space-y-0.5">
+                  {allArtists.length === 0 && !isLoadingMoreArtists
+                    ? Array.from({ length: 4 }).map((_, i) => (
+                        <Skeleton key={i} className="h-9 w-full rounded-lg" />
+                      ))
+                    : allArtists.map((artist) => {
+                        const isSelected = selectedArtists.includes(artist.id);
+                        return (
+                          <button
                             key={artist.id}
-                            className="flex items-center space-x-2"
+                            onClick={() =>
+                              handleArtistChange(artist.id, !isSelected)
+                            }
+                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all ${
+                              isSelected
+                                ? "bg-primary/10 text-primary font-semibold"
+                                : "hover:bg-muted text-foreground"
+                            }`}
                           >
-                            <Checkbox
-                              id={`artist-${artist.id}`}
-                              checked={selectedArtists.includes(artist.id)}
-                              onCheckedChange={(checked) =>
-                                handleArtistChange(artist.id, !!checked)
-                              }
-                            />
-                            <label
-                              htmlFor={`artist-${artist.id}`}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            <span
+                              className={`flex items-center justify-center h-6 w-6 rounded-full text-[10px] font-bold shrink-0 ${
+                                isSelected
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted text-muted-foreground"
+                              }`}
                             >
+                              {artist.name.charAt(0).toUpperCase()}
+                            </span>
+                            <span className="flex-1 text-left">
                               {artist.name}
-                            </label>
-                          </div>
-                        ))}
-                    {artistPagination.hasMore && (
-                      <Button
-                        variant="link"
-                        size="sm"
-                        onClick={() => fetchArtists(artistPagination.skip)}
-                        disabled={isLoadingMoreArtists}
-                        className="p-0 h-auto mt-2"
-                      >
-                        {isLoadingMoreArtists ? "Loading..." : "Load more"}
-                      </Button>
-                    )}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
+                            </span>
+                            {isSelected && (
+                              <Check className="h-3.5 w-3.5 shrink-0" />
+                            )}
+                          </button>
+                        );
+                      })}
+                  {artistPagination.hasMore && (
+                    <button
+                      onClick={() => fetchArtists(artistPagination.skip)}
+                      disabled={isLoadingMoreArtists}
+                      className="w-full mt-1.5 py-1.5 text-xs text-primary hover:underline disabled:opacity-50 font-medium"
+                    >
+                      {isLoadingMoreArtists ? "Loading..." : "+ Load more"}
+                    </button>
+                  )}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
 
-              <AccordionItem value="orientation">
-                <AccordionTrigger className="text-base font-semibold py-2">
+            {/* Orientation */}
+            <AccordionItem value="orientation" className="border-b">
+              <AccordionTrigger className="px-5 py-3 text-sm font-semibold hover:no-underline hover:bg-muted/30">
+                <div className="flex items-center gap-2 flex-1">
+                  <LayoutTemplate className="h-3.5 w-3.5 text-muted-foreground" />
                   Orientation
-                </AccordionTrigger>
-                <AccordionContent className="pt-2">
-                  <div className="space-y-2 pr-2">
-                    {orientationOptions.map((orientation) => (
-                      <div
-                        key={orientation}
-                        className="flex items-center space-x-2"
+                  {selectedOrientations.length > 0 && (
+                    <span className="bg-primary text-primary-foreground text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
+                      {selectedOrientations.length}
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    {
+                      key: "portrait",
+                      shape: (
+                        <div className="w-3 h-5 rounded-sm border-[2.5px] border-current" />
+                      ),
+                      label: "Portrait",
+                    },
+                    {
+                      key: "landscape",
+                      shape: (
+                        <div className="w-5 h-3 rounded-sm border-[2.5px] border-current" />
+                      ),
+                      label: "Landscape",
+                    },
+                    {
+                      key: "square",
+                      shape: (
+                        <div className="w-4 h-4 rounded-sm border-[2.5px] border-current" />
+                      ),
+                      label: "Square",
+                    },
+                    {
+                      key: "circular",
+                      shape: (
+                        <div className="w-4 h-4 rounded-full border-[2.5px] border-current" />
+                      ),
+                      label: "Circular",
+                    },
+                  ].map(({ key, shape, label }) => {
+                    const isSelected = selectedOrientations.includes(key);
+                    return (
+                      <button
+                        key={key}
+                        onClick={() =>
+                          handleOrientationChange(key, !isSelected)
+                        }
+                        className={`flex flex-col items-center gap-2 py-3 rounded-xl border-2 text-xs font-medium transition-all ${
+                          isSelected
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border hover:border-muted-foreground/40 hover:bg-muted text-muted-foreground"
+                        }`}
                       >
-                        <Checkbox
-                          id={`orient-${orientation}`}
-                          checked={selectedOrientations.includes(orientation)}
-                          onCheckedChange={(checked) =>
-                            handleOrientationChange(orientation, !!checked)
-                          }
-                        />
-                        <label
-                          htmlFor={`orient-${orientation}`}
-                          className="text-sm font-medium leading-none capitalize peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          {orientation}
-                        </label>
-                      </div>
-                    ))}
+                        {shape}
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Price Range */}
+            <AccordionItem value="price" className="border-b-0">
+              <AccordionTrigger className="px-5 py-3 text-sm font-semibold hover:no-underline hover:bg-muted/30">
+                <div className="flex items-center gap-2 flex-1">
+                  <IndianRupee className="h-3.5 w-3.5 text-muted-foreground" />
+                  Price Range
+                  {isPriceFilterActive && (
+                    <span className="bg-primary text-primary-foreground text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
+                      ✓
+                    </span>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-5 pb-5">
+                <div className="space-y-4">
+                  <div className="flex justify-between text-xs font-medium">
+                    <span className="bg-muted px-2 py-1 rounded-md text-muted-foreground">
+                      ₹{Number(priceRange[0]).toLocaleString("en-IN")}
+                    </span>
+                    <span className="bg-muted px-2 py-1 rounded-md text-muted-foreground">
+                      ₹{Number(priceRange[1]).toLocaleString("en-IN")}
+                    </span>
                   </div>
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="price" className="border-b-0">
-                <AccordionTrigger className="text-base font-semibold py-2">
-                  Price Range (₹)
-                </AccordionTrigger>
-                <AccordionContent className="pt-2">
-                  <div className="space-y-4">
-                    <Slider
-                      min={0}
-                      max={100000}
-                      step={1000}
-                      value={priceRange}
-                      onValueChange={(values: [number, number]) => {
-                        setPriceRange(values);
-                        setMinPriceInput(String(values[0]));
-                        setMaxPriceInput(String(values[1]));
-                      }}
-                      onValueCommit={handlePriceSliderCommit}
-                    />
-                    <div className="flex justify-between items-center gap-2">
-                      <div className="relative w-full">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                          ₹
-                        </span>
-                        <Input
-                          type="number"
-                          placeholder="Min"
-                          value={minPriceInput}
-                          onChange={(e) =>
-                            handlePriceInputChange("min", e.target.value)
-                          }
-                          onBlur={applyPriceChange}
-                          className="w-full h-9 pl-6 hide-number-arrows"
-                        />
-                      </div>
-                      <span className="text-muted-foreground">-</span>
-                      <div className="relative w-full">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                          ₹
-                        </span>
-                        <Input
-                          type="number"
-                          placeholder="Max"
-                          value={maxPriceInput}
-                          onChange={(e) =>
-                            handlePriceInputChange("max", e.target.value)
-                          }
-                          onBlur={applyPriceChange}
-                          className="w-full h-9 pl-6 hide-number-arrows"
-                        />
-                      </div>
+                  <Slider
+                    min={0}
+                    max={100000}
+                    step={1000}
+                    value={priceRange}
+                    onValueChange={(values: [number, number]) => {
+                      setPriceRange(values);
+                      setMinPriceInput(String(values[0]));
+                      setMaxPriceInput(String(values[1]));
+                    }}
+                    onValueCommit={handlePriceSliderCommit}
+                  />
+                  <div className="flex gap-2 items-center">
+                    <div className="flex-1 relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">
+                        ₹
+                      </span>
+                      <Input
+                        type="number"
+                        placeholder="Min"
+                        value={minPriceInput}
+                        onChange={(e) =>
+                          handlePriceInputChange("min", e.target.value)
+                        }
+                        onBlur={applyPriceChange}
+                        className="pl-6 h-9 text-sm hide-number-arrows"
+                      />
+                    </div>
+                    <div className="h-px w-3 bg-border shrink-0" />
+                    <div className="flex-1 relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">
+                        ₹
+                      </span>
+                      <Input
+                        type="number"
+                        placeholder="Max"
+                        value={maxPriceInput}
+                        onChange={(e) =>
+                          handlePriceInputChange("max", e.target.value)
+                        }
+                        onBlur={applyPriceChange}
+                        className="pl-6 h-9 text-sm hide-number-arrows"
+                      />
                     </div>
                   </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </CardContent>
-        </Card>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
       </aside>
 
       {/* Main Content */}
       <main className="lg:col-span-3">
         <div className="space-y-6">
           {activeFilters.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-medium">Active Filters:</span>
+            <div className="flex items-center gap-2 flex-wrap bg-muted/30 px-4 py-3 rounded-xl border">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
+                Active:
+              </span>
               {activeFilters.map((filter) => (
-                <Button
+                <button
                   key={`${filter.type}-${filter.value}`}
-                  variant="secondary"
-                  size="sm"
                   onClick={() => {
                     if (filter.type === "category")
                       removeCategoryFilter(filter.value);
@@ -623,19 +731,18 @@ function ProductsPageComponent() {
                     if (filter.type === "artist")
                       removeArtistFilter(filter.value);
                   }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
                 >
                   {filter.label}
-                  <X className="ml-2 h-4 w-4" />
-                </Button>
+                  <X className="h-3 w-3" />
+                </button>
               ))}
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={clearAllFilters}
-                className="text-sm text-primary hover:bg-transparent hover:text-primary hover:underline"
+                className="inline-flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-destructive transition-colors font-medium"
               >
-                <ListRestart className="mr-2 h-4 w-4" /> Clear all
-              </Button>
+                <ListRestart className="h-3 w-3" /> Clear all
+              </button>
             </div>
           )}
 

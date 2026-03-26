@@ -10,8 +10,15 @@ import { PageTransitionProvider } from "@/context/PageTransitionProvider";
 import PageTransitionLoader from "@/components/layout/PageTransitionLoader";
 
 export const metadata: Metadata = {
-  title: "ArtsyCraftsy - Your destination for unique art",
-  description: "Discover and commission beautiful art pieces on ArtsyCraftsy.",
+  title: "A&C Studio - Your destination for unique art",
+  description: "Discover and commission beautiful art pieces on A&C Studio.",
+  icons: {
+    icon: [
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -27,7 +34,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-body antialiased flex flex-col min-h-screen">
+      <body className="font-body antialiased flex flex-col min-h-screen" suppressHydrationWarning>
         <Suspense fallback={null}>
           <PageTransitionProvider>
             <CartProvider>

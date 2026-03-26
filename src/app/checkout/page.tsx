@@ -451,7 +451,7 @@ export default function CheckoutPage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: amount,
         currency: currency,
-        name: "ArtsyCraftsy",
+        name: "A&C Studio",
         description: "Art Transaction",
         order_id: razorpay_order_id,
         method: {

@@ -14,6 +14,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
@@ -37,6 +44,7 @@ import {
   MapPin,
   Check,
   Loader2,
+  CreditCard,
 } from "lucide-react";
 import { format, parse, isValid } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -57,6 +65,28 @@ const profileSchema = z.object({
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
+
+const bankSchema = z
+  .object({
+    accountHolderName: z.string().min(2, "Account holder name is required"),
+    accountNumber: z
+      .string()
+      .min(9, "Account number must be at least 9 digits")
+      .max(18, "Account number must be at most 18 digits")
+      .regex(/^\d+$/, "Account number must contain only digits"),
+    confirmAccountNumber: z.string().min(1, "Please confirm your account number"),
+    ifscCode: z
+      .string(),
+    accountType: z.enum(["savings", "current"], {
+      required_error: "Please select an account type",
+    }),
+  })
+  .refine((data) => data.accountNumber === data.confirmAccountNumber, {
+    message: "Account numbers do not match",
+    path: ["confirmAccountNumber"],
+  });
+
+type BankFormValues = z.infer<typeof bankSchema>;
 
 interface UserData {
   name: string;
@@ -198,6 +228,221 @@ const PublishShotForm = ({
           </TabsContent>
         </div>
       </Tabs>
+    </div>
+  );
+};
+
+const BankDetailsForm = ({ onSuccess }: { onSuccess: () => void }) => {
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<BankFormValues>({
+    resolver: zodResolver(bankSchema),
+    defaultValues: {
+      accountHolderName: "",
+      accountNumber: "",
+      confirmAccountNumber: "",
+      ifscCode: "",
+      accountType: "savings",
+    },
+  });
+
+  const onSubmit: SubmitHandler<BankFormValues> = async (data) => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user-bank-account`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            account_holder_name: data.accountHolderName,
+            account_number: data.accountNumber,
+            ifsc_code: data.ifscCode,
+            account_type: data.accountType,
+          }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (response.ok && result.status === 1) {
+        toast({
+          title: result.message,
+          variant: "success",
+        });
+        onSuccess();
+      } else {
+        toast({
+          title: "Failed to save bank details",
+          description: result.message || "An unexpected error occurred.",
+          variant: "destructive",
+        });
+      }
+    } catch {
+      toast({
+        title: "An Error Occurred",
+        description: "Could not connect to the server. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div>
+      <h3 className="text-xl font-semibold text-center mb-2">
+        Add Bank Account Details
+      </h3>
+      <p className="text-muted-foreground mb-8 max-w-xl mx-auto text-center">
+        Provide your bank account details so we can transfer your earnings
+        directly to your account.
+      </p>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <FormField
+            control={form.control}
+            name="accountHolderName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Account Holder Name</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Enter account holder name"
+                      {...field}
+                      className="pl-10"
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <FormField
+              control={form.control}
+              name="accountNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Account Number</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Enter account number"
+                        {...field}
+                        className="pl-10"
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="confirmAccountNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Account Number</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Re-enter account number"
+                        {...field}
+                        className="pl-10"
+                        onPaste={(e) => e.preventDefault()}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="ifscCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>IFSC Code</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g. SBIN0001234"
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(e.target.value.toUpperCase())
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="accountType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Account Type</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select account type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="savings">Savings</SelectItem>
+                    <SelectItem value="current">Current</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex justify-between items-center">
+            <Button
+              type="button"
+              variant="ghost"
+              size="lg"
+              onClick={onSuccess}
+              disabled={isSubmitting}
+            >
+              Skip for now
+            </Button>
+            <Button
+              type="submit"
+              size="lg"
+              className="bg-primary hover:bg-primary/90"
+              disabled={isSubmitting}
+            >
+              {isSubmitting && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Save &amp; Finish
+            </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 };
@@ -907,14 +1152,9 @@ function CompleteProfilePageComponent() {
             />
           )}
           {currentStepId === "payment" && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-                Payment integration is under construction.
-              </p>
-              <Button size="lg" disabled>
-                Finish Setup (Coming Soon)
-              </Button>
-            </div>
+            <BankDetailsForm
+              onSuccess={() => router.push("/seller/my-artworks")}
+            />
           )}
         </div>
       </div>

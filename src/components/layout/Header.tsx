@@ -22,8 +22,31 @@ import { usePageTransition } from "@/context/PageTransitionProvider";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Products" },
-  { href: "/custom-art", label: "Custom Art" },
+  { href: "/custom-art", label: "AI Studio" },
 ];
+
+const NavLinkItem = ({
+  href,
+  label,
+  pathname,
+  onClick,
+}: {
+  href: string;
+  label: string;
+  pathname: string;
+  onClick: (e: React.MouseEvent, href: string) => void;
+}) => {
+  return (
+    <Link href={href} passHref onClick={(e) => onClick(e, href)}>
+      <Button
+        variant={pathname === href ? "secondary" : "ghost"}
+        className={`font-body ${pathname === href ? "font-semibold" : ""}`}
+      >
+        {label}
+      </Button>
+    </Link>
+  );
+};
 
 const Header = () => {
   const { getItemCount } = useCart();
@@ -129,19 +152,6 @@ const Header = () => {
     startTransition();
   };
 
-  const NavLinkItem = ({ href, label }: { href: string; label: string }) => {
-    return (
-      <Link href={href} passHref onClick={(e) => handleNavClick(e, href)}>
-        <Button
-          variant={pathname === href ? "secondary" : "ghost"}
-          className={`font-body ${pathname === href ? "font-semibold" : ""}`}
-        >
-          {label}
-        </Button>
-      </Link>
-    );
-  };
-
   return (
     <header className="bg-card shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center gap-2">
@@ -165,7 +175,7 @@ const Header = () => {
             />
           </form>
           {navLinks.map((link) => (
-            <NavLinkItem key={link.href} {...link} />
+            <NavLinkItem key={link.href} {...link} pathname={pathname} onClick={handleNavClick} />
           ))}
         </nav>
 
@@ -311,7 +321,7 @@ const Header = () => {
         <div className="md:hidden absolute top-full left-0 right-0 bg-card shadow-lg py-2 z-30 animate-in fade-in slide-in-from-top-2 duration-300">
           <nav className="flex flex-col items-center space-y-2 px-4">
             {navLinks.map((link) => (
-              <NavLinkItem key={link.href} {...link} />
+              <NavLinkItem key={link.href} {...link} pathname={pathname} onClick={handleNavClick} />
             ))}
 
             {isLoggedIn ? (

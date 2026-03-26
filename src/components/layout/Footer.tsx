@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Logo from "../shared/Logo";
+import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 import { Icons } from "@/components/shared/Icons";
 import { useEffect, useState } from "react";
@@ -17,6 +17,7 @@ const Footer = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const currentYear = new Date().getFullYear();
 
   useEffect(() => {
     const fetchFooterData = async () => {
@@ -72,7 +73,10 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Left Section */}
           <div className="md:col-span-4 lg:col-span-3 space-y-4">
-            <Logo />
+            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <Image src="/icon-192x192.png" alt="A&C Studio" width={40} height={40} className="h-10 w-10" />
+              <span className="font-bold text-base text-foreground">A&C Studio</span>
+            </Link>
             <p className="text-sm text-muted-foreground">
               A premier platform for discovering, buying, and commissioning
               unique artwork from talented artists.
@@ -114,7 +118,7 @@ const Footer = () => {
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link
-                    href="#"
+                    href="/faq/collector"
                     className="text-muted-foreground hover:text-primary"
                   >
                     Collector's FAQ
@@ -153,7 +157,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/faq/seller"
                     className="text-muted-foreground hover:text-primary"
                   >
                     Seller's FAQ
@@ -230,14 +234,6 @@ const Footer = () => {
                     Contact
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="text-muted-foreground hover:text-primary"
-                  >
-                    Careers
-                  </Link>
-                </li>
               </ul>
             </div>
           </div>
@@ -247,7 +243,7 @@ const Footer = () => {
 
         <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground">
           <p>
-            &copy; {new Date().getFullYear()} ArtsyCraftsy. All rights reserved.
+            &copy; {currentYear} A&C Studio. All rights reserved.
           </p>
           <div className="flex space-x-4 mt-2 sm:mt-0">
             <Link href="#" className="hover:text-primary">

@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   ListOrdered,
   Edit3,
@@ -16,6 +16,7 @@ import {
   LogOut,
   Package,
   Loader2,
+  Landmark,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
@@ -27,19 +28,63 @@ interface User {
   type?: string;
 }
 
+interface BankAccount {
+  id: string;
+  is_default: boolean;
+  created_at: string;
+  bank_account: {
+    ifsc: string;
+    bank_name: string;
+    name: string;
+    account_number: string;
+  };
+}
+
 function DashboardComponent() {
   const router = useRouter();
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
+  const [isFetchingBankAccounts, setIsFetchingBankAccounts] = useState(false);
 
   useEffect(() => {
     const userDataString = localStorage.getItem("user");
     if (userDataString) {
-      setUser(JSON.parse(userDataString));
+      const parsedUser = JSON.parse(userDataString);
+      setUser(parsedUser);
+      if (parsedUser.type === "artist") {
+        fetchBankAccounts();
+      }
     } else {
       router.push("/login");
     }
   }, [router]);
+
+  const fetchBankAccounts = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+
+    setIsFetchingBankAccounts(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user-bank-account`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      const result = await response.json();
+      if (response.ok && result.status === 1) {
+        setBankAccounts(result.data);
+      }
+    } catch {
+      toast({
+        title: "Could not load bank accounts",
+        variant: "destructive",
+      });
+    } finally {
+      setIsFetchingBankAccounts(false);
+    }
+  };
 
   const handleLogout = async () => {
     const token = localStorage.getItem("authToken");
@@ -175,19 +220,59 @@ function DashboardComponent() {
         </Link>
       </div>
 
-      {/* Placeholder for recent activity or important notifications */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline text-2xl">
-            Recent Activity
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            No recent activity to display. (Placeholder)
-          </p>
-        </CardContent>
-      </Card>
+      {isArtist && (
+        <section className="bg-card p-6 rounded-lg shadow">
+          <div className="flex items-center gap-3 mb-6">
+            <Landmark className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold font-headline">
+              Bank Accounts
+            </h2>
+          </div>
+
+          {isFetchingBankAccounts ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : bankAccounts.length === 0 ? (
+            <p className="text-muted-foreground text-sm text-center py-8">
+              No bank accounts added yet.
+            </p>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {bankAccounts.map((account) => (
+                <div
+                  key={account.id}
+                  className="border rounded-lg p-4 space-y-3"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-medium">{account.bank_account.bank_name}</p>
+                    {account.is_default && (
+                      <Badge variant="secondary" className="shrink-0">
+                        Default
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>
+                      <span className="text-foreground font-medium">Account Holder: </span>
+                      {account.bank_account.name}
+                    </p>
+                    <p>
+                      <span className="text-foreground font-medium">Account No: </span>
+                      {"•".repeat(account.bank_account.account_number.length - 4)}
+                      {account.bank_account.account_number.slice(-4)}
+                    </p>
+                    <p>
+                      <span className="text-foreground font-medium">IFSC: </span>
+                      {account.bank_account.ifsc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }
