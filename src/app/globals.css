@@ -89,6 +89,11 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Apply glassmorphism universally to cards and popovers */
+  .bg-card, .bg-popover {
+    @apply bg-background/60 backdrop-blur-xl shadow-lg border-opacity-50 !important;
+  }
 }
 
 @layer utilities {

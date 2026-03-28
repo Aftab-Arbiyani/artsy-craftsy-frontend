@@ -234,6 +234,22 @@ const Footer = () => {
                     Contact
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    href="/shipping-policy"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Shipping & Delivery
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/cancellation-policy"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Cancellation & Refund
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
@@ -249,7 +265,7 @@ const Footer = () => {
             <Link href="#" className="hover:text-primary">
               Privacy Policy
             </Link>
-            <Link href="#" className="hover:text-primary">
+            <Link href="/terms" className="hover:text-primary">
               Terms & Conditions
             </Link>
           </div>
