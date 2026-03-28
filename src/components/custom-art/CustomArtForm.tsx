@@ -61,14 +61,20 @@ const customArtRequestSchema = z.object({
 
 type CustomArtFormValues = z.infer<typeof customArtRequestSchema>;
 
+
 interface CustomArtFormProps {
   isLoggedIn: boolean;
   onAuthRequired: () => void;
+  prefillData?: {
+    description: string;
+    imagePath: string;
+  } | null;
 }
 
 export default function CustomArtForm({
   isLoggedIn,
   onAuthRequired,
+  prefillData,
 }: CustomArtFormProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -82,6 +88,21 @@ export default function CustomArtForm({
       budget_range: "",
     },
   });
+
+  // Prefill logic
+  React.useEffect(() => {
+    if (prefillData) {
+      if (prefillData.description) {
+        form.setValue("description", prefillData.description);
+      }
+      if (prefillData.imagePath) {
+        // Set image preview using the image base URL
+        const baseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "";
+        setImagePreview(baseUrl + prefillData.imagePath);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillData]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

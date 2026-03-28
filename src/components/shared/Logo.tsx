@@ -1,16 +1,21 @@
 import Link from "next/link";
-import { Palette } from "lucide-react";
+import Image from "next/image";
 
-const Logo = () => {
+interface LogoProps {
+  size?: "sm" | "md";
+}
+
+const Logo = ({ size = "md" }: LogoProps) => {
   return (
-    <Link
-      href="/"
-      className="flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors"
-    >
-      <Palette size={32} />
-      <span className="font-headline text-xl sm:text-2xl md:text-3xl font-bold">
-        ArtsyCraftsy
-      </span>
+    <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
+      <Image
+        src="/logo-header.png"
+        alt="A&C Studio"
+        width={200}
+        height={60}
+        className={size === "sm" ? "h-8 w-auto" : "h-14 w-auto"}
+        priority
+      />
     </Link>
   );
 };

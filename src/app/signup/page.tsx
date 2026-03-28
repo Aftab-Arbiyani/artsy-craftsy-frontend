@@ -217,7 +217,7 @@ function SignupFormComponent() {
                 {accountTypeParam === "artist" ? "Artist" : "Customer"} Account
               </h1>
               <p className="text-balance text-muted-foreground">
-                Join ArtsyCraftsy and explore a world of art.
+                Join A&C Studio and explore a world of art.
               </p>
             </div>
 
