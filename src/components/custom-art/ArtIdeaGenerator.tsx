@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Sparkles, Lightbulb, Loader2, Wand2, Info, Send } from 'lucide-react';
+import { Sparkles, Lightbulb, Loader2, Wand2, Info, Send, Zap } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +15,12 @@ import { Badge } from '@/components/ui/badge';
 interface ArtIdeaGeneratorProps {
   isLoggedIn: boolean;
   userType?: string | null;
+  hasSubscription: boolean;
+  generationsUsed: number;
+  generationLimit: number;
   onAuthRequired: () => void;
+  onSubscriptionRequired: () => void;
+  onGenerationUsed: () => void;
   onCommission?: (data: { description: string; imagePath: string }) => void;
 }
 
@@ -26,7 +31,7 @@ const SAMPLE_PROMPTS = [
   "Hyper-realistic oil painting of a forest at dusk"
 ];
 
-export default function ArtIdeaGenerator({ isLoggedIn, userType, onAuthRequired, onCommission }: ArtIdeaGeneratorProps) {
+export default function ArtIdeaGenerator({ isLoggedIn, userType, hasSubscription, generationsUsed, generationLimit, onAuthRequired, onSubscriptionRequired, onGenerationUsed, onCommission }: ArtIdeaGeneratorProps) {
   const [description, setDescription] = useState('');
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +47,16 @@ export default function ArtIdeaGenerator({ isLoggedIn, userType, onAuthRequired,
       onAuthRequired();
       return;
     }
-    
+
+    if (generationsUsed >= generationLimit) {
+      if (hasSubscription) {
+        toast({ title: "Generation limit reached", description: "You've used all generations for this billing cycle.", variant: "destructive" });
+      } else {
+        onSubscriptionRequired();
+      }
+      return;
+    }
+
     if (!description.trim()) {
       toast({ title: "Description needed", description: "Please describe your art idea.", variant: "destructive" });
       return;
@@ -72,6 +86,7 @@ export default function ArtIdeaGenerator({ isLoggedIn, userType, onAuthRequired,
 
       if (response.ok && result.status === 1) {
         setGeneratedImage(result.data.response_image);
+        onGenerationUsed();
         toast({ title: "Idea Generated!", description: "Check out the AI-powered artwork below.", variant: "success" });
       } else {
         toast({ 
@@ -153,18 +168,43 @@ export default function ArtIdeaGenerator({ isLoggedIn, userType, onAuthRequired,
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                disabled={isLoading} 
-                className="w-full h-11 sm:h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-bold shadow-lg shadow-accent/20 transition-all active:scale-[0.98] text-sm"
-              >
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                ) : (
-                  <Lightbulb className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                )}
-                {isLoading ? 'Generating Masterpiece...' : 'Generate AI Visual'}
-              </Button>
+              <div className="space-y-2">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full h-11 sm:h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-bold shadow-lg shadow-accent/20 transition-all active:scale-[0.98] text-sm"
+                >
+                  {isLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                  ) : (
+                    <Lightbulb className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  )}
+                  {isLoading ? 'Generating Masterpiece...' : 'Generate AI Visual'}
+                </Button>
+
+                <div className={cn(
+                  "flex items-center justify-between px-1 text-[11px]",
+                  generationsUsed >= generationLimit ? "text-destructive" : "text-muted-foreground"
+                )}>
+                  <span className="flex items-center gap-1">
+                    <Zap className="h-3 w-3" />
+                    {hasSubscription
+                      ? `${generationsUsed} / ${generationLimit} generations used this cycle`
+                      : generationLimit - generationsUsed > 0
+                        ? `${generationLimit - generationsUsed} free generation${generationLimit - generationsUsed === 1 ? '' : 's'} remaining this month`
+                        : 'Free limit reached for this month'}
+                  </span>
+                  {!hasSubscription && (
+                    <button
+                      type="button"
+                      onClick={onSubscriptionRequired}
+                      className="font-semibold underline underline-offset-2 hover:text-accent transition-colors"
+                    >
+                      Upgrade
+                    </button>
+                  )}
+                </div>
+              </div>
             </form>
             
             <div className="flex items-start gap-2 p-3 sm:p-4 bg-muted/50 rounded-lg text-[10px] sm:text-[11px] text-muted-foreground italic leading-tight">

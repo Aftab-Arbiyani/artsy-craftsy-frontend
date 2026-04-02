@@ -66,6 +66,18 @@ export default function CancellationPolicyPage() {
 
         <div>
           <h2 className="font-headline text-lg font-semibold mb-2">
+            Custom Orders
+          </h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Custom orders are non-cancellable and non-refundable. Since custom
+            products are made specifically to order based on your requirements,
+            we are unable to accept cancellation or refund requests once the
+            order has been placed.
+          </p>
+        </div>
+
+        <div>
+          <h2 className="font-headline text-lg font-semibold mb-2">
             Refund Processing
           </h2>
           <p className="text-muted-foreground leading-relaxed">

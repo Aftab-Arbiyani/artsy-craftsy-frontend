@@ -220,7 +220,7 @@ const Footer = () => {
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link
-                    href="#"
+                    href="/about-us"
                     className="text-muted-foreground hover:text-primary"
                   >
                     About Us
