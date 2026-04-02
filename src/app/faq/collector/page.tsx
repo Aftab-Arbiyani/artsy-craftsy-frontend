@@ -15,10 +15,10 @@ const collectorFaqs = [
     question:
       "I don’t know what to buy. How can I get some help with choosing art?",
     answer:
-      "ArtsyCraftsy tries to help you choose art carefully through many features on our site. Remember, there is no ‘right’ way to select art, so you should just choose what appeals to you. First, try using our filters on the Artworks section. They let you shortlist artworks by category, orientation, and price, which will really help narrow your choices down. As you browse, you can explore detailed descriptions and artist bios to connect with the work.",
+      "Arts&Craft Studio tries to help you choose art carefully through many features on our site. Remember, there is no ‘right’ way to select art, so you should just choose what appeals to you. First, try using our filters on the Artworks section. They let you shortlist artworks by category, orientation, and price, which will really help narrow your choices down. As you browse, you can explore detailed descriptions and artist bios to connect with the work.",
   },
   {
-    question: "How do I purchase an artwork on ArtsyCraftsy?",
+    question: "How do I purchase an artwork on Arts&Craft Studio?",
     answer:
       "Simply browse our collection, click on an artwork you like, and select 'Add to Cart' or 'Buy Now'. You can then proceed to checkout, provide your delivery address, and complete the payment using our secure Razorpay gateway.",
   },
@@ -50,12 +50,12 @@ const collectorFaqs = [
   {
     question: "When will I receive my order?",
     answer:
-      "The anxiety around receiving a couriered artwork can indeed be great. However, ArtsyCrafsty has a Studio2Home feature and your artwork will be sent to you straight from the artists’ studio or seller’s home. Depending on where you are in the world, the delivery of your artwork will take approximately 7-15 days from the time that the artist dispatches it. We will do our best to keep you informed at every stage, and you will be notified of the courier details. In most cases, you can also track the shipment online.",
+      "The anxiety around receiving a couriered artwork can indeed be great. However, Arts&Craft Studio has a Studio2Home feature and your artwork will be sent to you straight from the artists’ studio or seller’s home. Depending on where you are in the world, the delivery of your artwork will take approximately 7-15 days from the time that the artist dispatches it. We will do our best to keep you informed at every stage, and you will be notified of the courier details. In most cases, you can also track the shipment online.",
   },
   {
     question: "How do I know if the artist has sent my artwork?",
     answer:
-      "ArtsyCraftsy tries its best to get your artwork to your home as soon as possible. You will receive Emails from us at every stage of the process, but don’t forget to ensure that your contact details with us are updated, and correct!",
+      "Arts&Craft Studio tries its best to get your artwork to your home as soon as possible. You will receive Emails from us at every stage of the process, but don’t forget to ensure that your contact details with us are updated, and correct!",
   },
   {
     question: "What are prints?",
@@ -83,7 +83,7 @@ export default function CollectorFaqPage() {
 
       <p className="text-muted-foreground mb-10">
         Find answers to common questions about buying, tracking, and
-        commissioning art on ArtsyCraftsy.
+        commissioning art on Arts&Craft Studio.
       </p>
 
       <Accordion type="single" collapsible className="w-full space-y-4">

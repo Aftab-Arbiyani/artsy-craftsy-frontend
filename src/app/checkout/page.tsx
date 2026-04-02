@@ -451,7 +451,8 @@ export default function CheckoutPage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: amount,
         currency: currency,
-        name: "A&C Studio",
+        name: "Arts&Craft Studio",
+        image: 'public/favicon-32x32.png',
         description: "Art Transaction",
         order_id: razorpay_order_id,
         method: {

@@ -69,6 +69,7 @@ interface OrderDetails {
   courier_reciept: string | null;
   cancelled_at: string | null;
   cancel_reason: string | null;
+  amount_receivable: number;
   items: {
     id: string;
     quantity: number;
@@ -722,6 +723,20 @@ export default function OrderDetailsDrawer({
                     ₹{parseFloat(details.total_amount).toLocaleString("en-IN")}
                   </span>
                 </div>
+
+                {userType === "artist" && details.amount_receivable != null && (
+                  <>
+                    <Separator className="bg-border/50 my-2" />
+                    <div className="flex justify-between items-baseline pt-1">
+                      <span className="font-headline font-bold text-lg text-success">
+                        Amount Receivable
+                      </span>
+                      <span className="font-headline font-bold text-2xl text-success">
+                        ₹{details.amount_receivable.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </>
           )}

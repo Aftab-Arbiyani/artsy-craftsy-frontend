@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CustomArtForm from "@/components/custom-art/CustomArtForm";
 import ArtIdeaGenerator from "@/components/custom-art/ArtIdeaGenerator";
+import SubscriptionModal from "@/components/custom-art/SubscriptionModal";
 import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog,
@@ -23,6 +24,10 @@ export default function CustomArtPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userType, setUserType] = useState<string | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [hasSubscription, setHasSubscription] = useState(false);
+  const [generationsUsed, setGenerationsUsed] = useState(0);
+  const [generationLimit, setGenerationLimit] = useState(2);
   const [activeTab, setActiveTab] = useState("ai-studio");
   const [prefillData, setPrefillData] = useState<{
     description: string;
@@ -44,6 +49,27 @@ export default function CustomArtPage() {
       } catch (e) {
         console.error("Error parsing user data", e);
       }
+    }
+
+    if (token) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/subscriptions/status`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.status === 1) {
+            const isActive = !!data.data?.is_active;
+            setHasSubscription(isActive);
+            if (isActive) {
+              setGenerationsUsed(data.data?.generations_used ?? 0);
+              setGenerationLimit(data.data?.generation_limit ?? 0);
+            } else {
+              setGenerationsUsed(data.data?.free_generations_used ?? 0);
+              setGenerationLimit(2);
+            }
+          }
+        })
+        .catch(() => {});
     }
   }, []);
 
@@ -107,7 +133,12 @@ export default function CustomArtPage() {
           <ArtIdeaGenerator
             isLoggedIn={isLoggedIn}
             userType={userType}
+            hasSubscription={hasSubscription}
+            generationsUsed={generationsUsed}
+            generationLimit={generationLimit}
             onAuthRequired={() => setShowAuthDialog(true)}
+            onSubscriptionRequired={() => setShowSubscriptionModal(true)}
+            onGenerationUsed={() => setGenerationsUsed((n) => n + 1)}
             onCommission={handleCommissionFromAI}
           />
         </div>
@@ -143,7 +174,12 @@ export default function CustomArtPage() {
             <ArtIdeaGenerator
               isLoggedIn={isLoggedIn}
               userType={userType}
+              hasSubscription={hasSubscription}
+              generationsUsed={generationsUsed}
+            generationLimit={generationLimit}
               onAuthRequired={() => setShowAuthDialog(true)}
+              onSubscriptionRequired={() => setShowSubscriptionModal(true)}
+              onGenerationUsed={() => setGenerationsUsed((n) => n + 1)}
               onCommission={handleCommissionFromAI}
             />
           </TabsContent>
@@ -226,6 +262,11 @@ export default function CustomArtPage() {
       )}
 
       <AuthPopup />
+      <SubscriptionModal
+        open={showSubscriptionModal}
+        onOpenChange={setShowSubscriptionModal}
+        onSubscribed={() => setHasSubscription(true)}
+      />
     </div>
   );
 }
