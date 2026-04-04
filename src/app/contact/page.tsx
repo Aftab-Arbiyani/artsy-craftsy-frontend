@@ -136,8 +136,7 @@ export default function ContactPage() {
             </h3>
             <p className="text-sm text-muted-foreground">
               Email id: poornima@mojarto.com <br />
-              Address: No 123, Sterling Rd, Nungambakkam, Chennai, Tamil Nadu
-              600034
+              Address: D-402 Harmain 33, Sheikh Oaf Road, Opposite Dayaar, Sarkhej Ahmedabad GUJARAT 380055
             </p>
           </section>
         </div>

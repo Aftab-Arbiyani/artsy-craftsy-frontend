@@ -90,7 +90,7 @@ const artworkSchema = z
       .number({ invalid_type_error: "Must be a number" })
       .positive("Price must be a positive number.")
       .optional(),
-    status: z.enum(["active", "in_active", "archived"]),
+    status: z.enum(["active", "in_active", "archived", "sold"]),
     amountReceivable: z.coerce.number().optional(),
     isCopyrightOwner: z.boolean().optional(),
   })
@@ -1483,6 +1483,7 @@ export default function ArtworkUploadForm({
                             <SelectItem value="active">Active</SelectItem>
                             <SelectItem value="in_active">Inactive</SelectItem>
                             <SelectItem value="archived">Archived</SelectItem>
+                            <SelectItem value="sold">Sold</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

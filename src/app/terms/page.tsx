@@ -133,7 +133,7 @@ export default function TermsPage() {
       </div>
 
       <p className="text-muted-foreground mb-10 leading-relaxed">
-        For the purpose of these Terms and Conditions, The term "we", "us", "our" used anywhere on this page shall mean Aftab Arbiyani, whose registered/operational office is B-204 Dayaar, Sheikh Oaf Road, Opposite Harmain 33, Sarkhej Ahmedabad GUJARAT 380055 . "you", "your", "user", "visitor" shall mean any natural or legal person who is visiting our website and/or agreed to purchase from us.
+        For the purpose of these Terms and Conditions, The term "we", "us", "our" used anywhere on this page shall mean Aftab Arbiyani, whose registered/operational office is D-402 Harmain 33, Sheikh Oaf Road, Opposite Dayaar, Sarkhej Ahmedabad GUJARAT 380055. "you", "your", "user", "visitor" shall mean any natural or legal person who is visiting our website and/or agreed to purchase from us.
       </p>
 
       <div className="space-y-8">
