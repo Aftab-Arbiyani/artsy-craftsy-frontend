@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { ChevronLeft, Truck } from "lucide-react";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Shipping Policy",
+  description:
+    "Learn about shipping timelines, delivery partners, and policies for artwork orders on Arts & Craft Studio.",
+  path: "/shipping-policy",
+});
 
 export default function ShippingPolicyPage() {
   return (
@@ -12,12 +21,13 @@ export default function ShippingPolicyPage() {
         Back to Home
       </Link>
 
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-4">
         <Truck className="h-8 w-8 text-primary" />
         <h1 className="font-headline text-3xl sm:text-4xl font-bold">
           Shipping & Delivery Policy
         </h1>
       </div>
+      <p className="text-xs text-muted-foreground mb-8">Last updated: April 2025</p>
 
       <div className="space-y-8">
         <div>

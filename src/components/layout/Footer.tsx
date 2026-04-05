@@ -84,24 +84,28 @@ const Footer = () => {
             <div className="flex space-x-3">
               <Link
                 href="#"
+                aria-label="Follow us on Twitter"
                 className="text-muted-foreground hover:text-primary"
               >
                 <Icons.twitter className="h-5 w-5" />
               </Link>
               <Link
                 href="#"
+                aria-label="Follow us on LinkedIn"
                 className="text-muted-foreground hover:text-primary"
               >
                 <Icons.linkedin className="h-5 w-5" />
               </Link>
               <Link
                 href="#"
+                aria-label="Follow us on Instagram"
                 className="text-muted-foreground hover:text-primary"
               >
                 <Icons.instagram className="h-5 w-5" />
               </Link>
               <Link
                 href="#"
+                aria-label="Subscribe on YouTube"
                 className="text-muted-foreground hover:text-primary"
               >
                 <Icons.youtube className="h-5 w-5" />
@@ -111,7 +115,7 @@ const Footer = () => {
 
           {/* Right Section */}
           <div className="md:col-span-8 lg:col-span-9 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
-            <div>
+            <nav aria-label="For Collectors">
               <h3 className="font-semibold text-foreground mb-4">
                 FOR COLLECTORS
               </h3>
@@ -141,8 +145,8 @@ const Footer = () => {
                   </Link>
                 </li>
               </ul>
-            </div>
-            <div>
+            </nav>
+            <nav aria-label="For Artists">
               <h3 className="font-semibold text-foreground mb-4">
                 FOR ARTISTS
               </h3>
@@ -163,17 +167,9 @@ const Footer = () => {
                     Seller's FAQ
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    href="/seller/my-artworks"
-                    className="text-muted-foreground hover:text-primary"
-                  >
-                    My Artworks
-                  </Link>
-                </li>
               </ul>
-            </div>
-            <div>
+            </nav>
+            <nav aria-label="Categories">
               <h3 className="font-semibold text-foreground mb-4">CATEGORIES</h3>
               <ul className="space-y-2 text-sm">
                 {isLoading
@@ -193,8 +189,8 @@ const Footer = () => {
                       </li>
                     ))}
               </ul>
-            </div>
-            <div>
+            </nav>
+            <nav aria-label="Featured Artists">
               <h3 className="font-semibold text-foreground mb-4">ARTISTS</h3>
               <ul className="space-y-2 text-sm">
                 {isLoading
@@ -214,8 +210,8 @@ const Footer = () => {
                       </li>
                     ))}
               </ul>
-            </div>
-            <div>
+            </nav>
+            <nav aria-label="Company">
               <h3 className="font-semibold text-foreground mb-4">COMPANY</h3>
               <ul className="space-y-2 text-sm">
                 <li>
@@ -251,7 +247,7 @@ const Footer = () => {
                   </Link>
                 </li>
               </ul>
-            </div>
+            </nav>
           </div>
         </div>
 
@@ -261,14 +257,14 @@ const Footer = () => {
           <p>
             &copy; {currentYear} Arts&Craft Studio. All rights reserved.
           </p>
-          <div className="flex space-x-4 mt-2 sm:mt-0">
-            <Link href="#" className="hover:text-primary">
+          <nav aria-label="Legal" className="flex space-x-4 mt-2 sm:mt-0">
+            <Link href="/privacy" className="hover:text-primary">
               Privacy Policy
             </Link>
             <Link href="/terms" className="hover:text-primary">
               Terms & Conditions
             </Link>
-          </div>
+          </nav>
         </div>
       </div>
     </footer>
