@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import Link from "next/link";
+
+export const metadata: Metadata = buildMetadata({
+  title: "About Us",
+  description:
+    "Learn about Arts & Craft Studio — our mission to connect independent artists with art lovers and support handmade craft across India.",
+  path: "/about-us",
+});
 import {
   ChevronLeft,
   Palette,

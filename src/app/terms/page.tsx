@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { ChevronLeft, ScrollText } from "lucide-react";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Terms & Conditions",
+  description:
+    "Read the terms and conditions governing your use of Arts & Craft Studio — including buyer, seller, and commission policies.",
+  path: "/terms",
+});
 
 const sections = [
   {
@@ -65,7 +74,7 @@ const sections = [
   {
     title: "13. Contact Us",
     content:
-      "If you have any questions about these Terms & Conditions, please contact us through our Contact page or email us at support@acstudio.com.",
+      "If you have any questions about these Terms & Conditions, please contact us through our Contact page or email us at support.artsandcraftstudio@gmail.com.",
   },
   {
     title: "14. Disclaimer of Warranties",
@@ -125,12 +134,13 @@ export default function TermsPage() {
         Back to Home
       </Link>
 
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-4">
         <ScrollText className="h-8 w-8 text-primary" />
         <h1 className="font-headline text-3xl sm:text-4xl font-bold">
           Terms & Conditions
         </h1>
       </div>
+      <p className="text-xs text-muted-foreground mb-8">Last updated: April 2025</p>
 
       <p className="text-muted-foreground mb-10 leading-relaxed">
         For the purpose of these Terms and Conditions, The term "we", "us", "our" used anywhere on this page shall mean Arts&Craft Studio, whose registered/operational office is D-402 Harmain 33, Sheikh Oaf Road, Opposite Dayaar, Sarkhej Ahmedabad GUJARAT 380055. "you", "your", "user", "visitor" shall mean any natural or legal person who is visiting our website and/or agreed to purchase from us.

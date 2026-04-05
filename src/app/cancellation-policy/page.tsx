@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { ChevronLeft, RotateCcw } from "lucide-react";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Cancellation & Refund Policy",
+  description:
+    "Understand the cancellation and refund policy for orders and commissions placed on Arts & Craft Studio.",
+  path: "/cancellation-policy",
+});
 
 export default function CancellationPolicyPage() {
   return (
@@ -12,12 +21,13 @@ export default function CancellationPolicyPage() {
         Back to Home
       </Link>
 
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-4">
         <RotateCcw className="h-8 w-8 text-primary" />
         <h1 className="font-headline text-3xl sm:text-4xl font-bold">
           Cancellation & Refund Policy
         </h1>
       </div>
+      <p className="text-xs text-muted-foreground mb-8">Last updated: April 2025</p>
 
       <p className="text-muted-foreground mb-10 leading-relaxed">
         Arts&Craft Studio believes in helping its customers as far as possible, and
