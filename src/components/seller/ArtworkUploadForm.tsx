@@ -1275,7 +1275,7 @@ export default function ArtworkUploadForm({
               />
               <p className="text-xs text-muted-foreground">
                 Works should be shipped unframed and in in roll unless rolling
-                is not possible. Please write to partners@mojarto.com to change
+                is not possible. Please write to support.artsandcraftstudio@gmail.com to change
                 delivery condition
               </p>
 

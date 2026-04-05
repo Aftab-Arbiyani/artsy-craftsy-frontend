@@ -61,83 +61,60 @@ export default function ContactPage() {
       </h1>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Left Column */}
-        <div className="space-y-12">
+        <div className="space-y-8">
           <section>
-            <h2 className="text-xl font-semibold mb-4">Onart Quest Limited</h2>
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="flex-1">
-                <h3 className="font-semibold text-primary mb-2 flex items-center">
-                  <span className="w-1 h-6 bg-primary mr-3"></span>
-                  Regd. Office
-                </h3>
-                <p className="text-muted-foreground">
-                  No 123, Sterling Rd, Nungambakkam,
-                  <br />
-                  Chennai, Tamil Nadu 600034
-                </p>
+            <h2 className="text-xl font-semibold mb-4">Our Services</h2>
+            <div className="space-y-4">
+              <div className="flex items-start gap-4 p-4 rounded-lg border bg-card">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Phone className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Call / WhatsApp</p>
+                  <a
+                    href="tel:+918511474162"
+                    className="text-sm text-muted-foreground hover:text-primary mt-0.5 block"
+                  >
+                    +91 85114 74162
+                  </a>
+                </div>
               </div>
-              <div className="flex-1">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3886.992033623588!2d80.2398378153629!3d13.067495090772216!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a52666b3f7f7f7f%3A0x3f7f7f7f7f7f7f7f!2sSterling%20Rd%2C%20Nungambakkam%2C%20Chennai%2C%20Tamil%20Nadu!5e0!3m2!1sen!2sin!4v1620986798539!5m2!1sen!2sin"
-                  width="100%"
-                  height="150"
-                  style={{ border: 0 }}
-                  allowFullScreen={true}
-                  loading="lazy"
-                  className="rounded-lg shadow-md"
-                  title="Office Location"
-                ></iframe>
+
+              <div className="flex items-start gap-4 p-4 rounded-lg border bg-card">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Mail className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Customer Support</p>
+                  <a
+                    href="mailto:support.artsandcraftstudio@gmail.com"
+                    className="text-sm text-muted-foreground hover:text-primary mt-0.5 block break-all"
+                  >
+                    support.artsandcraftstudio@gmail.com
+                  </a>
+                </div>
               </div>
             </div>
           </section>
 
-          <section>
-            <h2 className="text-xl font-semibold mb-4">Our Services</h2>
-            <Card>
-              <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col">
-                  <div className="flex items-center">
-                    <span className="w-1 h-6 bg-primary mr-3"></span>
-                    <h3 className="font-semibold text-primary">
-                      Seller Support
-                    </h3>
-                  </div>
-                  <Separator className="w-16 my-2" />
-                  <a
-                    href="mailto:partners@mojarto.com"
-                    className="text-sm text-muted-foreground hover:text-primary flex items-center gap-2 break-all"
-                  >
-                    <Mail className="h-4 w-4 shrink-0" /> partners@mojarto.com
-                  </a>
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center">
-                    <span className="w-1 h-6 bg-primary mr-3"></span>
-                    <h3 className="font-semibold text-primary">
-                      Customer Support
-                    </h3>
-                  </div>
-                  <Separator className="w-16 my-2" />
-                  <a
-                    href="mailto:contactus@mojarto.com"
-                    className="text-sm text-muted-foreground hover:text-primary flex items-center gap-2 break-all"
-                  >
-                    <Mail className="h-4 w-4 shrink-0" /> contactus@mojarto.com
-                  </a>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
+          <Separator />
 
           <section>
-            <h3 className="font-semibold text-primary mb-2 flex items-center">
-              <span className="w-1 h-6 bg-primary mr-3"></span>
-              Data Privacy Grievance
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Email id: poornima@mojarto.com <br />
-              Address: D-402 Harmain 33, Sheikh Oaf Road, Opposite Dayaar, Sarkhej Ahmedabad GUJARAT 380055
-            </p>
+            <h2 className="text-xl font-semibold mb-4">Data Privacy Grievance</h2>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Mail className="h-4 w-4 shrink-0 text-primary" />
+                <a href="mailto:support.artsandcraftstudio@gmail.com" className="hover:text-primary break-all">
+                  support.artsandcraftstudio@gmail.com
+                </a>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Phone className="h-4 w-4 shrink-0 text-primary" />
+                <a href="tel:+918511474162" className="hover:text-primary">
+                  +91 85114 74162
+                </a>
+              </div>
+            </div>
           </section>
         </div>
 

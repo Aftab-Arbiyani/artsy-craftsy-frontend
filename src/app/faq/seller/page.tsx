@@ -20,7 +20,7 @@ const sellerFaqs: { question: string; answer: React.ReactNode }[] = [
   {
     question: "What is the platform commission?",
     answer:
-      "A&C Studio charges a flat 15% commission on every successful sale. This fee covers platform maintenance, marketing, payment gateway charges, and artist support. The 'Amount Receivable' shown when you list a product is the final amount you will get.",
+      "Arts&Craft Studio charges a flat 15% commission on every successful sale. This fee covers platform maintenance, marketing, payment gateway charges, and artist support. The 'Amount Receivable' shown when you list a product is the final amount you will get.",
   },
   {
     question: "How do I get paid?",
@@ -74,7 +74,7 @@ const sellerFaqs: { question: string; answer: React.ReactNode }[] = [
         <p>
           There is also a <strong>Notifications</strong> section on your
           dashboard where details of all sold pieces will appear. Keep logging in
-          to A&C Studio to check your notifications.
+          to Arts&Craft Studio to check your notifications.
         </p>
       </div>
     ),
@@ -149,7 +149,7 @@ export default function SellerFaqPage() {
 
       <p className="text-muted-foreground mb-10">
         Everything you need to know about listing your art, managing orders, and
-        growing your presence on A&C Studio.
+        growing your presence on Arts&Craft Studio.
       </p>
 
       <Accordion type="single" collapsible className="w-full space-y-4">

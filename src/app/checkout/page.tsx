@@ -452,7 +452,6 @@ export default function CheckoutPage() {
         amount: amount,
         currency: currency,
         name: "Arts&Craft Studio",
-        image: 'public/favicon-32x32.png',
         description: "Art Transaction",
         order_id: razorpay_order_id,
         method: {

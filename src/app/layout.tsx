@@ -10,8 +10,8 @@ import { PageTransitionProvider } from "@/context/PageTransitionProvider";
 import PageTransitionLoader from "@/components/layout/PageTransitionLoader";
 
 export const metadata: Metadata = {
-  title: "A&C Studio - Your destination for unique art",
-  description: "Discover and commission beautiful art pieces on A&C Studio.",
+  title: "Arts&Craft Studio - Your destination for unique art",
+  description: "Discover and commission beautiful art pieces on Arts&Craft Studio.",
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },

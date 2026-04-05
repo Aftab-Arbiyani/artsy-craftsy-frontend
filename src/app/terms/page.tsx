@@ -5,27 +5,27 @@ const sections = [
   {
     title: "1. Acceptance of Terms",
     content:
-      "By accessing or using the A&C Studio platform, you agree to be bound by these Terms & Conditions. If you do not agree with any part of these terms, you must not use our services. We reserve the right to update these terms at any time, and continued use of the platform constitutes acceptance of any changes.",
+      "By accessing or using the Arts&Craft Studio platform, you agree to be bound by these Terms & Conditions. If you do not agree with any part of these terms, you must not use our services. We reserve the right to update these terms at any time, and continued use of the platform constitutes acceptance of any changes.",
   },
   {
     title: "2. Account Registration",
     content:
-      "To access certain features, you must create an account and provide accurate, complete information. You are responsible for maintaining the confidentiality of your login credentials and for all activity under your account. You must be at least 18 years old to create an account. A&C Studio reserves the right to suspend or terminate accounts that violate these terms.",
+      "To access certain features, you must create an account and provide accurate, complete information. You are responsible for maintaining the confidentiality of your login credentials and for all activity under your account. You must be at least 18 years old to create an account. Arts&Craft Studio reserves the right to suspend or terminate accounts that violate these terms.",
   },
   {
     title: "3. Buying Artwork",
     content:
-      "All artwork listed on the platform is sold by independent sellers. Prices are set by sellers and displayed in the currency indicated on the listing. By placing an order, you agree to pay the listed price plus any applicable shipping and taxes. Orders are subject to acceptance by the seller. A&C Studio acts as an intermediary and does not guarantee the availability or condition of any artwork.",
+      "All artwork listed on the platform is sold by independent sellers. Prices are set by sellers and displayed in the currency indicated on the listing. By placing an order, you agree to pay the listed price plus any applicable shipping and taxes. Orders are subject to acceptance by the seller. Arts&Craft Studio acts as an intermediary and does not guarantee the availability or condition of any artwork.",
   },
   {
     title: "4. Selling Artwork",
     content:
-      "Sellers must ensure that all artwork listed is original or that they hold the necessary rights to sell it. Sellers are responsible for accurate descriptions, pricing, and timely fulfillment of orders. A&C Studio may charge a commission on each sale as outlined in the seller agreement. We reserve the right to remove listings that violate our policies.",
+      "Sellers must ensure that all artwork listed is original or that they hold the necessary rights to sell it. Sellers are responsible for accurate descriptions, pricing, and timely fulfillment of orders. Arts&Craft Studio may charge a commission on each sale as outlined in the seller agreement. We reserve the right to remove listings that violate our policies.",
   },
   {
     title: "5. AI Studio & Custom Art",
     content:
-      "The AI Studio feature allows users to generate artwork using AI tools. Any artwork generated through the AI Studio is subject to our usage policies. Users may not use AI-generated content for unlawful purposes. A&C Studio does not guarantee exclusive ownership of AI-generated designs, as similar outputs may be produced for other users.",
+      "The AI Studio feature allows users to generate artwork using AI tools. Any artwork generated through the AI Studio is subject to our usage policies. Users may not use AI-generated content for unlawful purposes. Arts&Craft Studio does not guarantee exclusive ownership of AI-generated designs, as similar outputs may be produced for other users.",
   },
   {
     title: "6. Payments",
@@ -40,7 +40,7 @@ const sections = [
   {
     title: "8. Intellectual Property",
     content:
-      "All content on the platform, including logos, designs, and text, is the property of A&C Studio or its licensors. Artwork listed by sellers remains the intellectual property of the respective artists unless otherwise transferred through a sale. Users may not reproduce, distribute, or create derivative works from any content without explicit permission.",
+      "All content on the platform, including logos, designs, and text, is the property of Arts&Craft Studio or its licensors. Artwork listed by sellers remains the intellectual property of the respective artists unless otherwise transferred through a sale. Users may not reproduce, distribute, or create derivative works from any content without explicit permission.",
   },
   {
     title: "9. Prohibited Conduct",
@@ -50,17 +50,17 @@ const sections = [
   {
     title: "10. Limitation of Liability",
     content:
-      "A&C Studio is provided on an \"as is\" basis. We do not warrant that the platform will be uninterrupted or error-free. To the maximum extent permitted by law, A&C Studio shall not be liable for any indirect, incidental, or consequential damages arising from your use of the platform, including loss of data, revenue, or profits.",
+      "Arts&Craft Studio is provided on an \"as is\" basis. We do not warrant that the platform will be uninterrupted or error-free. To the maximum extent permitted by law, Arts&Craft Studio shall not be liable for any indirect, incidental, or consequential damages arising from your use of the platform, including loss of data, revenue, or profits.",
   },
   {
     title: "11. Privacy",
     content:
-      "Your use of the platform is also governed by our Privacy Policy. By using A&C Studio, you consent to the collection and use of your information as described therein. We take reasonable measures to protect your personal data but cannot guarantee absolute security.",
+      "Your use of the platform is also governed by our Privacy Policy. By using Arts&Craft Studio, you consent to the collection and use of your information as described therein. We take reasonable measures to protect your personal data but cannot guarantee absolute security.",
   },
   {
     title: "12. Governing Law",
     content:
-      "These Terms & Conditions are governed by and construed in accordance with the laws of the jurisdiction in which A&C Studio operates. Any disputes shall be resolved through binding arbitration or in the courts of the applicable jurisdiction.",
+      "These Terms & Conditions are governed by and construed in accordance with the laws of the jurisdiction in which Arts&Craft Studio operates. Any disputes shall be resolved through binding arbitration or in the courts of the applicable jurisdiction.",
   },
   {
     title: "13. Contact Us",
@@ -100,7 +100,7 @@ const sections = [
   {
     title: "20. Linking Policy",
     content:
-      "You may not create a link to our website from another website or document without Aftab Arbiyani's prior written consent.",
+      "You may not create a link to our website from another website or document without Arts&Craft Studio's prior written consent.",
   },
   {
     title: "21. Governing Jurisdiction",
@@ -133,7 +133,7 @@ export default function TermsPage() {
       </div>
 
       <p className="text-muted-foreground mb-10 leading-relaxed">
-        For the purpose of these Terms and Conditions, The term "we", "us", "our" used anywhere on this page shall mean Aftab Arbiyani, whose registered/operational office is D-402 Harmain 33, Sheikh Oaf Road, Opposite Dayaar, Sarkhej Ahmedabad GUJARAT 380055. "you", "your", "user", "visitor" shall mean any natural or legal person who is visiting our website and/or agreed to purchase from us.
+        For the purpose of these Terms and Conditions, The term "we", "us", "our" used anywhere on this page shall mean Arts&Craft Studio, whose registered/operational office is D-402 Harmain 33, Sheikh Oaf Road, Opposite Dayaar, Sarkhej Ahmedabad GUJARAT 380055. "you", "your", "user", "visitor" shall mean any natural or legal person who is visiting our website and/or agreed to purchase from us.
       </p>
 
       <div className="space-y-8">
