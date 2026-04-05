@@ -10,7 +10,7 @@ const Logo = ({ size = "md" }: LogoProps) => {
     <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
       <Image
         src="/logo-header.png"
-        alt="A&C Studio"
+        alt="Arts&Craft Studio"
         width={200}
         height={60}
         className={size === "sm" ? "h-8 w-auto" : "h-14 w-auto"}

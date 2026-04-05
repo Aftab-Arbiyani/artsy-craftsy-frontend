@@ -57,7 +57,7 @@ export default function ShippingPolicyPage() {
             Delivery Liability
           </h2>
           <p className="text-muted-foreground leading-relaxed">
-            Aftab Arbiyani is not liable for any delay in delivery by the
+            Arts&Craft Studio is not liable for any delay in delivery by the
             courier company / postal authorities and only guarantees to hand over
             the consignment to the courier company or postal authorities within
             10-15 days from the date of the order and payment or as per the
@@ -91,10 +91,10 @@ export default function ShippingPolicyPage() {
             </a>{" "}
             or{" "}
             <a
-              href="mailto:aftabarbiyani@gmail.com"
+              href="mailto:support.artsandcraftstudio@gmail.com"
               className="text-primary hover:underline"
             >
-              aftabarbiyani@gmail.com
+              support.artsandcraftstudio@gmail.com
             </a>
             .
           </p>

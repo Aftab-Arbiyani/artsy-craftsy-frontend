@@ -74,8 +74,8 @@ const Footer = () => {
           {/* Left Section */}
           <div className="md:col-span-4 lg:col-span-3 space-y-4">
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <Image src="/icon-192x192.png" alt="A&C Studio" width={40} height={40} className="h-10 w-10" />
-              <span className="font-bold text-base text-foreground">A&C Studio</span>
+              <Image src="/icon-192x192.png" alt="Arts&Craft Studio" width={40} height={40} className="h-10 w-10" />
+              <span className="font-bold text-base text-foreground">Arts&Craft Studio</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               A premier platform for discovering, buying, and commissioning
@@ -259,7 +259,7 @@ const Footer = () => {
 
         <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground">
           <p>
-            &copy; {currentYear} A&C Studio. All rights reserved.
+            &copy; {currentYear} Arts&Craft Studio. All rights reserved.
           </p>
           <div className="flex space-x-4 mt-2 sm:mt-0">
             <Link href="#" className="hover:text-primary">

@@ -165,7 +165,7 @@ export default function Home() {
                 Discover Unique Art, Create Your Own
               </h1>
               <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-                A&C Studio is your premier destination for exquisite
+                Arts&Craft Studio is your premier destination for exquisite
                 paintings, sculptures, and custom art commissions.
               </p>
               <div className="mx-auto mt-6 grid max-w-sm grid-cols-1 gap-4 sm:max-w-md sm:grid-cols-2">

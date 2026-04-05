@@ -20,7 +20,7 @@ export default function CancellationPolicyPage() {
       </div>
 
       <p className="text-muted-foreground mb-10 leading-relaxed">
-        Aftab Arbiyani believes in helping its customers as far as possible, and
+        Arts&Craft Studio believes in helping its customers as far as possible, and
         has therefore a liberal cancellation policy. Under this policy:
       </p>
 
@@ -44,7 +44,7 @@ export default function CancellationPolicyPage() {
             Perishable Items
           </h2>
           <p className="text-muted-foreground leading-relaxed">
-            Aftab Arbiyani does not accept cancellation requests for perishable
+            Arts&Craft Studio does not accept cancellation requests for perishable
             items like flowers, eatables etc. However, refund/replacement can be
             made if the customer establishes that the quality of product
             delivered is not good.
@@ -81,7 +81,7 @@ export default function CancellationPolicyPage() {
             Refund Processing
           </h2>
           <p className="text-muted-foreground leading-relaxed">
-            In case of any refunds approved by Aftab Arbiyani, it will take 8-10
+            In case of any refunds approved by Arts&Craft Studio, it will take 8-10
             days for the refund to be processed to the end customer.
           </p>
         </div>

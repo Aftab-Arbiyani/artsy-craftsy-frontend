@@ -76,7 +76,7 @@ export default function LoginPage() {
         localStorage.setItem("user", JSON.stringify(result.data));
         toast({
           title: "Login Successful",
-          description: result.message || "Welcome back to A&C Studio!",
+          description: result.message || "Welcome back to Arts&Craft Studio!",
           variant: "success",
         });
 
@@ -151,7 +151,7 @@ export default function LoginPage() {
         <div className="flex items-center justify-center py-12">
           <div className="mx-auto grid w-[400px] gap-6 px-4">
             <div className="grid gap-2 text-center">
-              <h1 className="text-2xl font-bold">Login With A&C Studio</h1>
+              <h1 className="text-2xl font-bold">Login With Arts&Craft Studio</h1>
             </div>
 
             {/* <div className="grid grid-cols-1 gap-4">

@@ -53,6 +53,11 @@ const collectorFaqs = [
       "The anxiety around receiving a couriered artwork can indeed be great. However, Arts&Craft Studio has a Studio2Home feature and your artwork will be sent to you straight from the artists’ studio or seller’s home. Depending on where you are in the world, the delivery of your artwork will take approximately 7-15 days from the time that the artist dispatches it. We will do our best to keep you informed at every stage, and you will be notified of the courier details. In most cases, you can also track the shipment online.",
   },
   {
+    question: "When will I receive my custom order?",
+    answer:
+      "The time taken to complete a custom order depends on the complexity of the artwork and the artist's schedule. Typically, it can take anywhere from 2 to 6 weeks. Once you place your order, the artist will provide you with an estimated timeline, and we will keep you updated throughout the process.",
+  },
+  {
     question: "How do I know if the artist has sent my artwork?",
     answer:
       "Arts&Craft Studio tries its best to get your artwork to your home as soon as possible. You will receive Emails from us at every stage of the process, but don’t forget to ensure that your contact details with us are updated, and correct!",

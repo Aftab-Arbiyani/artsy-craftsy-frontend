@@ -155,7 +155,6 @@ export default function SubscriptionModal({
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         subscription_id: razorpay_subscription_id,
         name: 'Arts&Craft Studio',
-        image: 'public/favicon-32x32.png',
         description: `AI Studio — ${selectedPlan.name} Subscription`,
         handler: async function (response: any) {
           // 4. Verify payment

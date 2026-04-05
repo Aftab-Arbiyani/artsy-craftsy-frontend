@@ -463,9 +463,17 @@ export default function CustomCheckoutPage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: amount,
         currency: currency,
-        name: "A&C Studio",
+        name: "Arts&Craft Studio",
         description: "Art Transaction",
         order_id: razorpay_order_id,
+        method: {
+          netbanking: true,
+          card: true,
+          upi: true,
+          wallet: false,
+          emi: false, // ❌ disable EMI
+          paylater: false,
+        },
         handler: async function (response: any) {
           const verificationResponse = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/payment/verify-payment`,
@@ -510,6 +518,26 @@ export default function CustomCheckoutPage() {
           color: "#4285F4", // primary color
         },
       };
+
+      const loadRazorpay = () =>
+        new Promise<void>((resolve, reject) => {
+          if ((window as any).Razorpay) {
+            resolve();
+            return;
+          }
+          const script = document.createElement("script");
+          script.src = "https://checkout.razorpay.com/v1/checkout.js";
+          script.onload = () => resolve();
+          script.onerror = () =>
+            reject(new Error("Failed to load Razorpay SDK."));
+          document.body.appendChild(script);
+        });
+
+      await loadRazorpay();
+
+      if (!(window as any).Razorpay) {
+        throw new Error("Razorpay SDK is not available.");
+      }
 
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
