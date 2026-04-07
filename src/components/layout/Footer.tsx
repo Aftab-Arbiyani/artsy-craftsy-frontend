@@ -82,34 +82,36 @@ const Footer = () => {
               unique artwork from talented artists.
             </p>
             <div className="flex space-x-3">
-              <Link
+              <a
                 href="#"
                 aria-label="Follow us on Twitter"
                 className="text-muted-foreground hover:text-primary"
               >
                 <Icons.twitter className="h-5 w-5" />
-              </Link>
-              <Link
+              </a>
+              <a
                 href="#"
                 aria-label="Follow us on LinkedIn"
                 className="text-muted-foreground hover:text-primary"
               >
                 <Icons.linkedin className="h-5 w-5" />
-              </Link>
-              <Link
-                href="#"
+              </a>
+              <a
+                href="https://www.instagram.com/artsandcraft.studio?igsh=NDNwcDlrYjd4c2h5"
                 aria-label="Follow us on Instagram"
                 className="text-muted-foreground hover:text-primary"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Icons.instagram className="h-5 w-5" />
-              </Link>
-              <Link
+              </a>
+              <a
                 href="#"
                 aria-label="Subscribe on YouTube"
                 className="text-muted-foreground hover:text-primary"
               >
                 <Icons.youtube className="h-5 w-5" />
-              </Link>
+              </a>
             </div>
           </div>
 

@@ -388,6 +388,14 @@ function ProductsPageComponent() {
   const removeArtistFilter = (artistId: string) =>
     handleArtistChange(artistId, false);
 
+  const [openSections, setOpenSections] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (window.innerWidth >= 1024) {
+      setOpenSections(["category", "artist", "orientation", "price"]);
+    }
+  }, []);
+
   const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
 
   const activeFilters = useMemo(() => {
@@ -457,7 +465,8 @@ function ProductsPageComponent() {
 
           <Accordion
             type="multiple"
-            defaultValue={["category", "artist", "orientation", "price"]}
+            value={openSections}
+            onValueChange={setOpenSections}
             className="w-full"
           >
             {/* Category */}
