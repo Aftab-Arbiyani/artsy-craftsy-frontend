@@ -15,6 +15,7 @@ export type Product = {
   discount?: number;
   year?: string;
   stock?: number;
+  city?: string;
 };
 
 export type CartItem = {

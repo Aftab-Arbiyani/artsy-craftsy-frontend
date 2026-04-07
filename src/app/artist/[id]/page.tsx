@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ProductCard from "@/components/products/ProductCard";
@@ -165,20 +164,22 @@ export default function ArtistProfilePage() {
     <div className="space-y-8">
       <header className="bg-card p-8 rounded-lg shadow-lg">
       <div className="flex flex-col md:flex-row items-center gap-8">
-        <Avatar className="h-32 w-32 border-4 border-background shadow-md overflow-hidden rounded-full">
-        <Image
-          src={
-          artist.profile_picture
-            ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${artist.profile_picture}`
-            : "https://placehold.co/128x128.png"
-          }
-          alt={artist.name}
-          data-ai-hint="artist portrait"
-          width={128}
-          height={128}
-          className="object-cover w-full h-full"
-        />
-        <AvatarFallback>{artist.name.charAt(0)}</AvatarFallback>
+        <Avatar className="h-32 w-32 border-4 border-background shadow-md overflow-hidden rounded-full text-2xl">
+          {artist.profile_picture && (
+            <AvatarImage
+              src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${artist.profile_picture}`}
+              alt={artist.name}
+              data-ai-hint="artist portrait"
+            />
+          )}
+          <AvatarFallback>
+            {artist.name
+              .split(" ")
+              .map((n) => n[0])
+              .slice(0, 2)
+              .join("")
+              .toUpperCase()}
+          </AvatarFallback>
         </Avatar>
         <div className="text-center md:text-left">
           <h1 className="font-headline text-4xl font-bold">{artist.name}</h1>

@@ -94,6 +94,89 @@ interface Category {
   name: string;
 }
 
+interface DobInputProps {
+  value: Date | undefined;
+  onChange: (date: Date | undefined) => void;
+}
+
+const DobInput = ({ value, onChange }: DobInputProps) => {
+  const [dateString, setDateString] = useState<string>("");
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  useEffect(() => {
+    if (value) {
+      setDateString(format(value, "dd-MM-yyyy"));
+    } else {
+      setDateString("");
+    }
+  }, [value]);
+
+  const handleDateSelect = (date: Date | undefined) => {
+    onChange(date);
+    setIsPopoverOpen(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/[^0-9]/g, "");
+    let formatted = raw;
+    if (raw.length >= 3 && raw.length <= 4) {
+      formatted = `${raw.slice(0, 2)}-${raw.slice(2)}`;
+    } else if (raw.length > 4) {
+      formatted = `${raw.slice(0, 2)}-${raw.slice(2, 4)}-${raw.slice(4, 8)}`;
+    }
+    setDateString(formatted);
+  };
+
+  const handleInputBlur = () => {
+    const parsedDate = parse(dateString, "dd-MM-yyyy", new Date());
+    if (isValid(parsedDate)) {
+      onChange(parsedDate);
+    } else {
+      onChange(undefined);
+    }
+  };
+
+  return (
+    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+      <div className="relative">
+        <FormControl>
+          <Input
+            placeholder="dd-MM-yyyy"
+            value={dateString}
+            onChange={handleInputChange}
+            onBlur={handleInputBlur}
+            maxLength={10}
+            className="pr-10"
+          />
+        </FormControl>
+        <PopoverTrigger asChild>
+          <Button
+            variant={"ghost"}
+            className="absolute right-0 top-0 h-full rounded-l-none px-3 hover:bg-transparent"
+          >
+            <span className="sr-only">Open calendar</span>
+            <CalendarIcon className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+      </div>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={value}
+          onSelect={handleDateSelect}
+          disabled={(date) =>
+            date > new Date() || date < new Date("1900-01-01")
+          }
+          captionLayout="dropdown-buttons"
+          fromYear={1900}
+          toYear={new Date().getFullYear()}
+          initialFocus
+        />
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 const Stepper = ({ steps }: { steps: { name: string; status: string }[] }) => {
   const getStepClass = (status: string) => {
     if (status === "complete") {
@@ -903,89 +986,16 @@ export default function CompleteProfile({
                   <FormField
                     control={form.control}
                     name="dob"
-                    render={({ field }) => {
-                      const [dateString, setDateString] = useState<string>("");
-                      const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-                      useEffect(() => {
-                        if (field.value) {
-                          setDateString(format(field.value, "dd-MM-yyyy"));
-                        } else {
-                          setDateString("");
-                        }
-                      }, [field.value]);
-
-                      const handleDateSelect = (date: Date | undefined) => {
-                        field.onChange(date);
-                        setIsPopoverOpen(false);
-                      };
-
-                      const handleInputChange = (
-                        e: React.ChangeEvent<HTMLInputElement>,
-                      ) => {
-                        setDateString(e.target.value);
-                      };
-
-                      const handleInputBlur = () => {
-                        const parsedDate = parse(
-                          dateString,
-                          "dd-MM-yyyy",
-                          new Date(),
-                        );
-                        if (isValid(parsedDate)) {
-                          field.onChange(parsedDate);
-                        } else {
-                          field.onChange(undefined);
-                        }
-                      };
-
-                      return (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Date of Birth</FormLabel>
-                          <Popover
-                            open={isPopoverOpen}
-                            onOpenChange={setIsPopoverOpen}
-                          >
-                            <div className="relative">
-                              <FormControl>
-                                <Input
-                                  placeholder="dd-MM-yyyy"
-                                  value={dateString}
-                                  onChange={handleInputChange}
-                                  onBlur={handleInputBlur}
-                                  className="pr-10"
-                                />
-                              </FormControl>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant={"ghost"}
-                                  className="absolute right-0 top-0 h-full rounded-l-none px-3 hover:bg-transparent"
-                                >
-                                  <span className="sr-only">Open calendar</span>
-                                  <CalendarIcon className="h-4 w-4" />
-                                </Button>
-                              </PopoverTrigger>
-                            </div>
-                            <PopoverContent
-                              className="w-auto p-0"
-                              align="start"
-                            >
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={handleDateSelect}
-                                disabled={(date) =>
-                                  date > new Date() ||
-                                  date < new Date("1900-01-01")
-                                }
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      );
-                    }}
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Date of Birth</FormLabel>
+                        <DobInput
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                   <FormField
                     control={form.control}

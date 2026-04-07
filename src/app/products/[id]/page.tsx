@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import ProductDetailsSkeleton from "@/components/skeletons/ProductDetailsSkeleton";
 import { cn } from "@/lib/utils";
 import MinimalProductCard from "@/components/products/MinimalProductCard";
+import ImageLightbox from "@/components/products/ImageLightbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   AlertDialog,
@@ -51,6 +52,7 @@ export default function ProductDetailsPage() {
   const [product, setProduct] = useState<Product | undefined | null>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [artistProducts, setArtistProducts] = useState<Product[]>([]);
@@ -124,6 +126,7 @@ export default function ProductDetailsPage() {
                 : undefined,
             dataAiHint: apiProduct.category?.name?.toLowerCase() || "artwork",
             year: apiProduct.year_of_artwork,
+            city: apiProduct?.city || "Unknown City",
           };
           setProduct(transformedProduct);
           if (transformedProduct.imageUrls.length > 0) {
@@ -254,7 +257,10 @@ export default function ProductDetailsPage() {
     <div className="space-y-12">
       {/* Centered Image Gallery */}
       <div className="w-full max-w-2xl mx-auto space-y-4">
-        <div className="relative aspect-auto w-full overflow-hidden rounded-lg shadow-lg">
+        <div
+          className="relative aspect-auto w-full overflow-hidden rounded-lg shadow-lg cursor-zoom-in"
+          onClick={() => setIsLightboxOpen(true)}
+        >
           {hasDiscount && (
             <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-xs font-bold px-2.5 py-1 rounded-full z-10">
               {product.discount}% OFF
@@ -384,20 +390,26 @@ export default function ProductDetailsPage() {
               <div className="space-y-8 sticky top-24">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16">
-                    <AvatarImage
-                      src={
-                        product.artistImage ||
-                        "https://placehold.co/100x100.png"
-                      }
-                      alt={product.artist}
-                      data-ai-hint="artist portrait"
-                    />
-                    <AvatarFallback>{product.artist.charAt(0)}</AvatarFallback>
+                    {product.artistImage && (
+                      <AvatarImage
+                        src={product.artistImage}
+                        alt={product.artist}
+                        data-ai-hint="artist portrait"
+                      />
+                    )}
+                    <AvatarFallback>
+                      {product.artist
+                        .split(" ")
+                        .map((n) => n[0])
+                        .slice(0, 2)
+                        .join("")
+                        .toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
                     <h3 className="text-lg font-bold">{product.artist}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Kolkata, India
+                      {product.city}, India
                     </p>
                     {product.artistId && (
                       <Link
@@ -474,6 +486,17 @@ export default function ProductDetailsPage() {
           </div>
         </div>
       )}
+
+      <ImageLightbox
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+        src={
+          selectedImage ||
+          (product.imageUrls && product.imageUrls[0]) ||
+          ""
+        }
+        alt={product.name}
+      />
     </div>
   );
 }
