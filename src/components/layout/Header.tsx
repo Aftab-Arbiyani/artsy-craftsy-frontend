@@ -434,7 +434,7 @@ const Header = () => {
                     Log In
                   </Button>
                 </Link>
-                <Link href="/signup?type=customer" passHref onClick={(e) => handleNavClick(e, "/signup?type=customer")}>
+                <Link href="/signup" passHref onClick={(e) => handleNavClick(e, "/signup")}>
                   <Button size="sm" className="rounded-full font-medium px-4">
                     Sign Up
                   </Button>
@@ -533,7 +533,7 @@ const Header = () => {
                     Log In
                   </Button>
                 </Link>
-                <Link href="/signup?type=customer" passHref className="w-full" onClick={(e) => handleNavClick(e, "/signup?type=customer")}>
+                <Link href="/signup" passHref className="w-full" onClick={(e) => handleNavClick(e, "/signup")}>
                   <Button className="w-full rounded-full">Sign Up</Button>
                 </Link>
               </div>
