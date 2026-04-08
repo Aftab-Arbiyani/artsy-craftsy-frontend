@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { UserPlus, Loader2, Eye, EyeOff, MailCheck } from "lucide-react";
+import { UserPlus, Loader2, Eye, EyeOff, MailCheck, ShoppingBag, Palette, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState, useEffect, Suspense } from "react";
@@ -61,6 +61,62 @@ const signupSchema = z
   );
 
 type SignupFormValues = z.infer<typeof signupSchema>;
+
+function RoleSelectionScreen() {
+  const router = useRouter();
+
+  return (
+    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] py-12 px-4">
+      <div className="w-full max-w-2xl">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-bold">Join Arts&Craft Studio</h1>
+          <p className="text-muted-foreground mt-2">
+            How would you like to join?
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <button
+            onClick={() => router.push("/signup?type=customer")}
+            className="group text-left border rounded-lg p-8 hover:border-primary hover:shadow-lg transition-all bg-card focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <ShoppingBag className="h-12 w-12 text-primary mb-4" />
+            <h2 className="text-xl font-bold mb-2">Collector</h2>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Browse, discover, and buy unique artwork from talented artists and
+              galleries.
+            </p>
+            <span className="mt-6 flex items-center gap-1 text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+              Sign up as Collector <ArrowRight className="h-4 w-4" />
+            </span>
+          </button>
+
+          <button
+            onClick={() => router.push("/signup?type=artist")}
+            className="group text-left border rounded-lg p-8 hover:border-primary hover:shadow-lg transition-all bg-card focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <Palette className="h-12 w-12 text-primary mb-4" />
+            <h2 className="text-xl font-bold mb-2">Artist / Gallery</h2>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Showcase and sell your artwork to a growing community of art
+              lovers and collectors.
+            </p>
+            <span className="mt-6 flex items-center gap-1 text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+              Sign up as Artist <ArrowRight className="h-4 w-4" />
+            </span>
+          </button>
+        </div>
+
+        <p className="text-center text-sm text-muted-foreground mt-8">
+          Already have an account?{" "}
+          <Link href="/login" className="underline text-red-500 font-medium">
+            Login
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function SignupFormComponent() {
   const { toast } = useToast();
@@ -416,10 +472,21 @@ function SignupFormComponent() {
   );
 }
 
+function SignupContent() {
+  const searchParams = useSearchParams();
+  const typeParam = searchParams.get("type");
+
+  if (typeParam !== "artist" && typeParam !== "customer") {
+    return <RoleSelectionScreen />;
+  }
+
+  return <SignupFormComponent />;
+}
+
 export default function SignupPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <SignupFormComponent />
+      <SignupContent />
     </Suspense>
   );
 }
