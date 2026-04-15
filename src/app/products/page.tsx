@@ -36,7 +36,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const PRODUCTS_PER_PAGE = 12;
+const PRODUCTS_PER_PAGE = 30;
 const ARTISTS_PER_PAGE = 5;
 
 const orientationOptions = ["portrait", "landscape", "square", "circular"];
