@@ -1,502 +1,177 @@
-"use client";
-
-import React from "react";
-import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
+import type { Metadata } from "next";
 import type { Product } from "@/lib/types";
-import { Button } from "@/components/ui/button";
-import { ShoppingCart, Zap } from "lucide-react";
-import { useCart } from "@/context/CartProvider";
-import { useToast } from "@/hooks/use-toast";
-import { Separator } from "@/components/ui/separator";
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import ProductDetailsSkeleton from "@/components/skeletons/ProductDetailsSkeleton";
-import { cn } from "@/lib/utils";
-import MinimalProductCard from "@/components/products/MinimalProductCard";
-import ImageLightbox from "@/components/products/ImageLightbox";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { usePageTransition } from "@/context/PageTransitionProvider";
+import ProductDetails from "./ProductDetails";
 
-const DetailRow = ({
-  label,
-  value,
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const IMAGE_BASE = process.env.NEXT_PUBLIC_IMAGE_BASE_URL ?? "";
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://artsandcraftstudio.in";
+
+async function fetchProductData(id: string) {
+  try {
+    const res = await fetch(`${API_BASE}/api/products/${id}`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    const result = await res.json();
+    if (result.status !== 1 || !result.data) return null;
+    return result.data;
+  } catch {
+    return null;
+  }
+}
+
+function transformProduct(p: any): Product {
+  const imageUrls: string[] =
+    p.media?.map((m: any) =>
+      m.file_path
+        ? `${IMAGE_BASE}${m.file_path}`
+        : "https://placehold.co/600x400.png"
+    ) || ["https://placehold.co/600x400.png"];
+
+  return {
+    id: p.id,
+    name: p.title,
+    description: p.description,
+    price: parseFloat(p.listing_price),
+    discount: p.discount ? parseFloat(p.discount) : undefined,
+    category: p.category?.name || "Uncategorized",
+    imageUrls,
+    artist: p.user?.name || "Unknown Artist",
+    artistId: p.user?.id,
+    artistBio: p.user?.bio,
+    artistImage: p.user?.profile_picture
+      ? `${IMAGE_BASE}${p.user.profile_picture}`
+      : undefined,
+    medium: p.materials?.name,
+    dimensions:
+      p.width && p.height ? `${p.width}x${p.height} inches` : undefined,
+    dataAiHint: p.category?.name?.toLowerCase() || "artwork",
+    year: p.year_of_artwork,
+    city: p?.city || "Unknown City",
+  };
+}
+
+export async function generateMetadata({
+  params,
 }: {
-  label: string;
-  value: React.ReactNode;
-}) => {
-  if (!value) return null;
-  return (
-    <React.Fragment>
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-sm text-foreground">{value}</dd>
-    </React.Fragment>
-  );
-};
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const p = await fetchProductData(id);
+  if (!p) return {};
 
-export default function ProductDetailsPage() {
-  const params = useParams();
-  const { id } = params;
-  const router = useRouter();
-  const [product, setProduct] = useState<Product | undefined | null>(undefined);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const title = p.title as string;
+  const description: string =
+    p.description ||
+    `${title} — original artwork by ${p.user?.name ?? "an artist"} on Arts & Craft Studio.`;
+  const imageUrl: string = p.media?.[0]?.file_path
+    ? `${IMAGE_BASE}${p.media[0].file_path}`
+    : `${SITE_URL}/og-default.jpg`;
+  const canonical = `${SITE_URL}/products/${id}`;
 
-  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
-  const [artistProducts, setArtistProducts] = useState<Product[]>([]);
-
-  const { addItem } = useCart();
-  const { toast } = useToast();
-  const { startTransition } = usePageTransition();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    // Check for auth token on the client side
-    const token = localStorage.getItem("authToken");
-    setIsLoggedIn(!!token);
-  }, []);
-
-  const handleAuthRedirect = (path: string) => {
-    startTransition();
-    router.push(path);
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      url: canonical,
+      title,
+      description,
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
+    },
   };
+}
 
-  useEffect(() => {
-    if (!id) {
-      setIsLoading(false);
-      setProduct(null);
-      return;
-    }
+export default async function ProductDetailsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const rawProduct = await fetchProductData(id);
+  const initialProduct = rawProduct ? transformProduct(rawProduct) : null;
 
-    const fetchProductAndRelated = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch main product
-        const productResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products/${id}`,
-        );
-        if (!productResponse.ok) {
-          setProduct(null);
-          return;
-        }
-        const productResult = await productResponse.json();
+  const canonical = `${SITE_URL}/products/${id}`;
+  const imageUrl = rawProduct?.media?.[0]?.file_path
+    ? `${IMAGE_BASE}${rawProduct.media[0].file_path}`
+    : `${SITE_URL}/og-default.jpg`;
 
-        if (productResult.status === 1 && productResult.data) {
-          const apiProduct = productResult.data;
-          const imageUrls = apiProduct.media?.map((m: any) =>
-            m.file_path
-              ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${m.file_path}`
-              : "https://placehold.co/600x400.png",
-          ) || ["https://placehold.co/600x400.png"];
-
-          const artistImage = apiProduct.user?.profile_picture
-            ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${apiProduct.user.profile_picture}`
-            : undefined;
-
-          const transformedProduct: Product = {
-            id: apiProduct.id,
-            name: apiProduct.title,
-            description: apiProduct.description,
-            price: parseFloat(apiProduct.listing_price),
-            discount: apiProduct.discount
-              ? parseFloat(apiProduct.discount)
-              : undefined,
-            category: apiProduct.category?.name || "Uncategorized",
-            imageUrls: imageUrls,
-            artist: apiProduct.user?.name || "Unknown Artist",
-            artistId: apiProduct.user?.id,
-            artistBio: apiProduct.user?.bio,
-            artistImage: artistImage,
-            medium: apiProduct.materials?.name,
-            dimensions:
-              apiProduct.width && apiProduct.height
-                ? `${apiProduct.width}x${apiProduct.height} inches`
-                : undefined,
-            dataAiHint: apiProduct.category?.name?.toLowerCase() || "artwork",
-            year: apiProduct.year_of_artwork,
-            city: apiProduct?.city || "Unknown City",
-          };
-          setProduct(transformedProduct);
-          if (transformedProduct.imageUrls.length > 0) {
-            setSelectedImage(transformedProduct.imageUrls[0]);
-          }
-
-          // Fetch related and artist products
-          const relatedResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products/related-products/${id}`,
-          );
-          if (relatedResponse.ok) {
-            const relatedResult = await relatedResponse.json();
-            if (relatedResult.status === 1 && relatedResult.data) {
-              const transformApiProduct = (item: any): Product => ({
-                id: item.id,
-                name: item.title,
-                description: item.description || "",
-                price: item.listing_price
-                  ? parseFloat(item.listing_price)
-                  : undefined,
-                imageUrls: item.media?.map((m: any) =>
-                  m.file_path
-                    ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${m.file_path}`
-                    : "https://placehold.co/600x400.png",
-                ) || ["https://placehold.co/600x400.png"],
-                artist: item.user?.name || "Unknown Artist",
-                category: item.category?.name || "Uncategorized",
-              });
-
-              if (Array.isArray(relatedResult.data.related_products)) {
-                setRelatedProducts(
-                  relatedResult.data.related_products.map(transformApiProduct),
-                );
-              }
-              if (Array.isArray(relatedResult.data.related_artist_products)) {
-                setArtistProducts(
-                  relatedResult.data.related_artist_products.map(
-                    transformApiProduct,
-                  ),
-                );
-              }
-            }
-          }
-        } else {
-          setProduct(null);
-        }
-      } catch (error) {
-        console.error("Failed to fetch product details:", error);
-        setProduct(null);
-      } finally {
-        setIsLoading(false);
+  const productSchema = initialProduct
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: initialProduct.name,
+        description: initialProduct.description,
+        image: imageUrl,
+        url: canonical,
+        offers: {
+          "@type": "Offer",
+          priceCurrency: "INR",
+          price: initialProduct.price,
+          availability: "https://schema.org/InStock",
+          seller: {
+            "@type": "Person",
+            name: initialProduct.artist,
+          },
+        },
+        ...(initialProduct.artist && {
+          creator: {
+            "@type": "Person",
+            name: initialProduct.artist,
+            ...(initialProduct.artistId && {
+              url: `${SITE_URL}/artist/${initialProduct.artistId}`,
+            }),
+          },
+        }),
       }
-    };
+    : null;
 
-    fetchProductAndRelated();
-  }, [id]);
-
-  if (isLoading) {
-    return <ProductDetailsSkeleton />;
-  }
-
-  if (product === null) {
-    return (
-      <div className="text-center py-12">
-        <h1 className="font-headline text-3xl mb-4">Product Not Found</h1>
-        <p className="text-muted-foreground mb-6">
-          Sorry, we couldn't find the product you're looking for.
-        </p>
-        <Link href="/products">
-          <Button variant="outline">Back to Products</Button>
-        </Link>
-      </div>
-    );
-  }
-
-  if (!product) return null;
-
-  const handleAddToCart = () => {
-    if (!product.price) return;
-    addItem(product as Product & { price: number });
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Products",
+        item: `${SITE_URL}/products`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: initialProduct?.name ?? "Product",
+        item: canonical,
+      },
+    ],
   };
-
-  const handleBuyNow = () => {
-    if (!product.price) return;
-    addItem(product as Product & { price: number });
-    router.push("/checkout");
-  };
-
-  const hasDiscount =
-    !!product.discount && product.discount > 0 && product.price;
-  const discountedPrice = hasDiscount
-    ? (product.price ?? 0) * (1 - (product.discount ?? 0) / 100)
-    : (product.price ?? 0);
-
-  const AuthPopup = ({
-    children,
-    onAction,
-  }: {
-    children: React.ReactNode;
-    onAction: () => void;
-  }) => (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Authentication Required</AlertDialogTitle>
-          <AlertDialogDescription>
-            Please log in or create an account to continue.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => handleAuthRedirect("/signup?type=customer")}
-            className="bg-secondary hover:bg-secondary/80 text-secondary-foreground"
-          >
-            Sign Up
-          </AlertDialogAction>
-          <AlertDialogAction onClick={() => handleAuthRedirect("/login")}>
-            Log In
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
 
   return (
-    <div className="space-y-12">
-      {/* Centered Image Gallery */}
-      <div className="w-full max-w-2xl mx-auto space-y-4">
-        <div
-          className="relative aspect-auto w-full overflow-hidden rounded-lg shadow-lg cursor-zoom-in"
-          onClick={() => setIsLightboxOpen(true)}
-        >
-          {hasDiscount && (
-            <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-xs font-bold px-2.5 py-1 rounded-full z-10">
-              {product.discount}% OFF
-            </div>
-          )}
-          <Image
-            src={
-              selectedImage ||
-              (product.imageUrls && product.imageUrls[0]) ||
-              "https://placehold.co/600x400.png"
-            }
-            alt={product.name}
-            width={600}
-            height={600}
-            className="object-contain w-full h-auto transition-opacity duration-300"
-            priority
-            data-ai-hint={product.dataAiHint || "art product detail"}
-          />
-        </div>
-        {product.imageUrls && product.imageUrls.length > 1 && (
-          <div className="flex justify-center gap-2">
-            {product.imageUrls.map((imgUrl, index) => (
-              <div
-                key={index}
-                onClick={() => setSelectedImage(imgUrl)}
-                className={cn(
-                  "relative w-20 h-20 rounded-md overflow-hidden cursor-pointer border-2 transition-all",
-                  selectedImage === imgUrl
-                    ? "border-primary"
-                    : "border-transparent hover:border-muted-foreground",
-                )}
-              >
-                <Image
-                  src={imgUrl}
-                  alt={`${product.name} thumbnail ${index + 1}`}
-                  fill
-                  sizes="80px"
-                  className="object-contain"
-                />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="max-w-4xl mx-auto space-y-10">
-        {/* Title and Price */}
-        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-          <div className="space-y-2">
-            <h1 className="font-headline text-4xl lg:text-5xl font-bold">
-              {product.name}
-            </h1>
-            {product.price && (
-              <div className="flex items-baseline gap-4">
-                <p className="text-2xl text-primary font-semibold">
-                  ₹{discountedPrice?.toLocaleString("en-IN")}
-                </p>
-                {hasDiscount && (
-                  <p className="text-xl text-muted-foreground line-through">
-                    ₹{product.price.toLocaleString("en-IN")}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-          {product.price && (
-            <div className="flex items-center gap-2 w-full md:w-auto">
-              {isLoggedIn ? (
-                <Button
-                  size="lg"
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-primary hover:bg-primary/90"
-                >
-                  <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-                </Button>
-              ) : (
-                <AuthPopup onAction={handleAddToCart}>
-                  <Button
-                    size="lg"
-                    className="flex-1 bg-primary hover:bg-primary/90"
-                  >
-                    <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-                  </Button>
-                </AuthPopup>
-              )}
-
-              {isLoggedIn ? (
-                <Button
-                  size="lg"
-                  onClick={handleBuyNow}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  <Zap className="mr-2 h-5 w-5" /> Buy Now
-                </Button>
-              ) : (
-                <AuthPopup onAction={handleBuyNow}>
-                  <Button size="lg" variant="outline" className="flex-1">
-                    <Zap className="mr-2 h-5 w-5" /> Buy Now
-                  </Button>
-                </AuthPopup>
-              )}
-            </div>
-          )}
-        </div>
-
-        <Separator />
-
-        <div className="grid lg:grid-cols-2 gap-x-12 gap-y-8">
-          <div className="lg:col-span-1 space-y-8">
-            <div className="space-y-4">
-              <h2 className="font-headline text-2xl font-semibold">
-                Specifications
-              </h2>
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
-                <DetailRow label="Category:" value={product.category} />
-                <DetailRow label="Style:" value={"Contemporary"} />
-                <DetailRow label="Medium:" value={product.medium} />
-                <DetailRow label="Created in:" value={product.year} />
-                <DetailRow label="Dimensions:" value={product.dimensions} />
-              </dl>
-            </div>
-          </div>
-
-          <div className="lg:col-span-1">
-            {product.artist && (
-              <div className="space-y-8 sticky top-24">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16">
-                    {product.artistImage && (
-                      <AvatarImage
-                        src={product.artistImage}
-                        alt={product.artist}
-                        data-ai-hint="artist portrait"
-                      />
-                    )}
-                    <AvatarFallback>
-                      {product.artist
-                        .split(" ")
-                        .map((n) => n[0])
-                        .slice(0, 2)
-                        .join("")
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="text-lg font-bold">{product.artist}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {product.city}, India
-                    </p>
-                    {product.artistId && (
-                      <Link
-                        href={`/artist/${product.artistId}`}
-                        passHref
-                        onClick={startTransition}
-                      >
-                        <Button
-                          variant="link"
-                          className="p-0 h-auto text-sm text-red-500"
-                        >
-                          View Profile
-                        </Button>
-                      </Link>
-                    )}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-bold">About Artist</h3>
-                  <p className="text-muted-foreground text-sm">
-                    {product.artistBio ||
-                      "This artist has not provided a bio yet."}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <Separator />
-
-        <div className="space-y-2">
-          <h2 className="font-headline text-2xl font-semibold">Description</h2>
-          <p className="text-base leading-relaxed text-muted-foreground">
-            {product.description}
-          </p>
-        </div>
-      </div>
-
-      {artistProducts.length > 0 && (
-        <div className="max-w-4xl mx-auto space-y-8">
-          <Separator />
-          <div>
-            <h2 className="font-headline text-3xl font-semibold mb-6 text-left">
-              More from this Artist
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {artistProducts.slice(0, 4).map((artistProduct) => (
-                <MinimalProductCard
-                  key={artistProduct.id}
-                  product={artistProduct}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+    <>
+      {productSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+        />
       )}
-
-      {relatedProducts.length > 0 && (
-        <div className="max-w-4xl mx-auto space-y-8">
-          <Separator />
-          <div>
-            <h2 className="font-headline text-3xl font-semibold mb-6 text-left">
-              Related Artwork
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {relatedProducts.slice(0, 4).map((relatedProduct) => (
-                <MinimalProductCard
-                  key={relatedProduct.id}
-                  product={relatedProduct}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <ImageLightbox
-        isOpen={isLightboxOpen}
-        onClose={() => setIsLightboxOpen(false)}
-        src={
-          selectedImage ||
-          (product.imageUrls && product.imageUrls[0]) ||
-          ""
-        }
-        alt={product.name}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-    </div>
+      <ProductDetails initialProduct={initialProduct} />
+    </>
   );
 }

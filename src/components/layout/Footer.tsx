@@ -90,7 +90,7 @@ const Footer = () => {
                 <Icons.twitter className="h-5 w-5" />
               </a>
               <a
-                href="https://www.facebook.com/people/artsandcraftstudio/61573413197507/"
+                href="https://www.facebook.com/people/artsandcraftstudio/61573413197507"
                 aria-label="Follow us on Facebook"
                 className="text-muted-foreground hover:text-primary"
               >

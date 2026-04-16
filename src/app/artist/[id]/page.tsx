@@ -1,239 +1,194 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import ProductCard from "@/components/products/ProductCard";
-import {
-  Loader2,
-  User,
-  AlertTriangle,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import type { Metadata } from "next";
 import type { Product } from "@/lib/types";
-import { Separator } from "@/components/ui/separator";
+import ArtistProfile from "./ArtistProfile";
 
-interface ArtistDetails {
-  id: string;
-  name: string;
-  email?: string;
-  bio: string;
-  profile_picture?: string;
-  address?: {
-    city: string;
-    country: string;
-  };
-}
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const IMAGE_BASE = process.env.NEXT_PUBLIC_IMAGE_BASE_URL ?? "";
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://artsandcraftstudio.in";
 
 const PRODUCTS_PER_PAGE = 8;
 
-export default function ArtistProfilePage() {
-  const params = useParams();
-  const { id } = params;
-  const [artist, setArtist] = useState<ArtistDetails | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalProducts, setTotalProducts] = useState(0);
+async function fetchArtistData(id: string) {
+  try {
+    const res = await fetch(`${API_BASE}/api/user/artist-profile/${id}`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    const result = await res.json();
+    if (result.status !== 1 || !result.data) return null;
+    return result.data;
+  } catch {
+    return null;
+  }
+}
 
-  useEffect(() => {
-    if (!id) {
-      setError("Artist ID is missing.");
-      setIsLoading(false);
-      return;
-    }
+async function fetchArtistProducts(id: string) {
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/products/artist-products/${id}?take=${PRODUCTS_PER_PAGE}&skip=0`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!res.ok) return { products: [], total: 0 };
+    const result = await res.json();
+    if (result.status !== 1) return { products: [], total: 0 };
+    return { products: result.data ?? [], total: result.total ?? 0 };
+  } catch {
+    return { products: [], total: 0 };
+  }
+}
 
-    const fetchArtistData = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch artist details and products in parallel
-        const [artistResponse, productsResponse] = await Promise.all([
-          fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/artist-profile/${id}`,
-          ),
-          fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/products/artist-products/${id}?take=${PRODUCTS_PER_PAGE}&skip=${(currentPage - 1) * PRODUCTS_PER_PAGE}`,
-          ),
-        ]);
+function transformArtistProduct(item: any, artistName: string): Product {
+  return {
+    id: item.id,
+    name: item.title,
+    description: item.description || "",
+    price: parseFloat(item.listing_price),
+    discount: item.discount ? parseFloat(item.discount) : undefined,
+    category: item.category?.name || "Uncategorized",
+    imageUrls:
+      item.media?.map((m: any) =>
+        m.file_path
+          ? `${IMAGE_BASE}${m.file_path}`
+          : "https://placehold.co/600x400.png"
+      ) || ["https://placehold.co/600x400.png"],
+    artist: artistName,
+    medium: item.materials?.name,
+    dataAiHint: item.category?.name?.toLowerCase() || "artwork",
+  };
+}
 
-        // Process artist details
-        const artistResult = await artistResponse.json();
-        if (artistResponse.ok && artistResult.status === 1) {
-          const artistData = artistResult.data;
-          const artistAddress = artistData.addresses && artistData.addresses.length > 0 ? {
-              city: artistData.addresses[0].city,
-              country: artistData.addresses[0].country || 'India', // Assuming country, add fallback
-          } : undefined;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const artist = await fetchArtistData(id);
+  if (!artist) return {};
 
-          setArtist({
-            id: artistData.id,
-            name: artistData.name,
-            bio: artistData.bio,
-            profile_picture: artistData.profile_picture,
-            address: artistAddress
-          });
-        } else {
-          setError(artistResult.message || "Failed to fetch artist details.");
-          setIsLoading(false);
-          return;
-        }
+  const name = artist.name as string;
+  const description: string =
+    artist.bio || `Discover artworks by ${name} on Arts & Craft Studio.`;
+  const imageUrl: string = artist.profile_picture
+    ? `${IMAGE_BASE}${artist.profile_picture}`
+    : `${SITE_URL}/og-default.jpg`;
+  const canonical = `${SITE_URL}/artist/${id}`;
 
-        // Process artist products
-        const productsResult = await productsResponse.json();
-        if (productsResponse.ok && productsResult.status === 1) {
-          const transformedProducts: Product[] = productsResult.data.map(
-            (item: any) => ({
-              id: item.id,
-              name: item.title,
-              description: item.description || "",
-              price: parseFloat(item.listing_price),
-              discount: item.discount ? parseFloat(item.discount) : undefined,
-              category: item.category?.name || "Uncategorized",
-              imageUrls: item.media?.map((m: any) =>
-                m.file_path
-                  ? `${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${m.file_path}`
-                  : "https://placehold.co/600x400.png",
-              ) || ["https://placehold.co/600x400.png"],
-              artist: artistResult.data?.name || "Unknown Artist",
-              medium: item.materials?.name,
-              dataAiHint: item.category?.name?.toLowerCase() || "artwork",
-            }),
-          );
-          setProducts(transformedProducts);
-          setTotalProducts(productsResult.total);
-        } else {
-          // It's not an error if an artist has no products
-          setProducts([]);
-          setTotalProducts(0);
-        }
+  return {
+    title: name,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "profile",
+      url: canonical,
+      title: `${name} | Arts & Craft Studio`,
+      description,
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: name }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: name,
+      description,
+      images: [imageUrl],
+    },
+  };
+}
 
-        setError(null);
-      } catch (err) {
-        setError("An unexpected error occurred. Please try again later.");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
+export default async function ArtistProfilePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  const [rawArtist, { products: rawProducts, total }] = await Promise.all([
+    fetchArtistData(id),
+    fetchArtistProducts(id),
+  ]);
+
+  const canonical = `${SITE_URL}/artist/${id}`;
+
+  const initialArtist = rawArtist
+    ? {
+        id: rawArtist.id,
+        name: rawArtist.name as string,
+        bio: rawArtist.bio as string,
+        profile_picture: rawArtist.profile_picture as string | undefined,
+        address:
+          rawArtist.addresses?.length > 0
+            ? {
+                city: rawArtist.addresses[0].city,
+                country: rawArtist.addresses[0].country || "India",
+              }
+            : undefined,
       }
-    };
+    : null;
 
-    fetchArtistData();
-  }, [id, currentPage]);
+  const initialProducts: Product[] = rawArtist
+    ? rawProducts.map((item: any) =>
+        transformArtistProduct(item, rawArtist.name)
+      )
+    : [];
 
-  const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
+  const personSchema = rawArtist
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        name: rawArtist.name,
+        description:
+          rawArtist.bio ||
+          `Independent artist on Arts & Craft Studio.`,
+        url: canonical,
+        ...(rawArtist.profile_picture && {
+          image: `${IMAGE_BASE}${rawArtist.profile_picture}`,
+        }),
+        ...(rawArtist.addresses?.length > 0 && {
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: rawArtist.addresses[0].city,
+            addressCountry: rawArtist.addresses[0].country || "IN",
+          },
+        }),
+      }
+    : null;
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: rawArtist?.name ?? "Artist",
+        item: canonical,
+      },
+    ],
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-[50vh]">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <AlertTriangle className="mx-auto h-16 w-16 text-destructive mb-4" />
-        <h1 className="font-headline text-3xl mb-4">Error</h1>
-        <p className="text-muted-foreground">{error}</p>
-      </div>
-    );
-  }
-
-  if (!artist) {
-    return (
-      <div className="text-center py-12">
-        <User className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-        <h1 className="font-headline text-3xl mb-4">Artist Not Found</h1>
-        <p className="text-muted-foreground">
-          The artist you are looking for does not exist.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-8">
-      <header className="bg-card p-8 rounded-lg shadow-lg">
-      <div className="flex flex-col md:flex-row items-center gap-8">
-        <Avatar className="h-32 w-32 border-4 border-background shadow-md overflow-hidden rounded-full text-2xl">
-          {artist.profile_picture && (
-            <AvatarImage
-              src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${artist.profile_picture}`}
-              alt={artist.name}
-              data-ai-hint="artist portrait"
-            />
-          )}
-          <AvatarFallback>
-            {artist.name
-              .split(" ")
-              .map((n) => n[0])
-              .slice(0, 2)
-              .join("")
-              .toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <div className="text-center md:text-left">
-          <h1 className="font-headline text-4xl font-bold">{artist.name}</h1>
-          <p className="text-muted-foreground mt-1">
-            {artist.address?.city || "Location not available"},{" "}
-            {artist.address?.country}
-          </p>
-          <div className="mt-4 prose prose-sm text-muted-foreground max-w-2xl">
-            <p>{artist.bio}</p>
-          </div>
-        </div>
-      </div>
-      </header>
-
-      <Separator />
-
-      <main>
-        {products.length > 0 ? (
-          <>
-            <div className="columns-2 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
-              {products.map((product) => (
-                <div key={product.id} className="break-inside-avoid">
-                  <ProductCard product={product} />
-                </div>
-              ))}
-            </div>
-            {totalPages > 1 && (
-              <div className="flex justify-center items-center space-x-4 mt-12">
-                <Button
-                  variant="outline"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-                </Button>
-                <span className="text-sm font-medium">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  Next <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </>
-        ) : (
-          <p className="text-center text-muted-foreground py-8">
-            This artist has not listed any artworks yet.
-          </p>
-        )}
-      </main>
-    </div>
+    <>
+      {personSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+        />
+      )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <ArtistProfile
+        initialArtist={initialArtist}
+        initialProducts={initialProducts}
+        initialTotal={total}
+      />
+    </>
   );
 }
