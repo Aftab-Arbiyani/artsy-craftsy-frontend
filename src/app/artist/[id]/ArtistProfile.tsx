@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ProductCard from "@/components/products/ProductCard";
@@ -11,9 +11,26 @@ import {
   AlertTriangle,
   ChevronLeft,
   ChevronRight,
+  UserPlus,
+  UserCheck,
+  MapPin,
+  Palette,
 } from "lucide-react";
 import type { Product } from "@/lib/types";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { usePageTransition } from "@/context/PageTransitionProvider";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ArtistDetails {
   id: string;
@@ -21,6 +38,7 @@ interface ArtistDetails {
   email?: string;
   bio: string;
   profile_picture?: string;
+  followersCount?: number;
   address?: {
     city: string;
     country: string;
@@ -40,6 +58,9 @@ export default function ArtistProfile({
 }) {
   const params = useParams();
   const { id } = params;
+  const router = useRouter();
+  const { toast } = useToast();
+  const { startTransition } = usePageTransition();
   const [artist, setArtist] = useState<ArtistDetails | null>(
     initialArtist !== undefined ? initialArtist : null
   );
@@ -48,6 +69,90 @@ export default function ArtistProfile({
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(initialTotal ?? 0);
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isSelf, setIsSelf] = useState(false);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
+  const [isBioExpanded, setIsBioExpanded] = useState(false);
+  const [followersCount, setFollowersCount] = useState<number>(
+    initialArtist?.followersCount ?? 0
+  );
+
+  const artistId = Array.isArray(id) ? id[0] : id;
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    setIsLoggedIn(!!token);
+
+    if (!token || !artistId) return;
+
+    const fetchFollowStatus = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/follow/status/${artistId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const result = await res.json();
+        if (res.ok && result.status === 1) {
+          setIsFollowing(!!result.data?.isFollowing);
+          setIsSelf(!!result.data?.isSelf);
+          if (typeof result.data?.followerCount === "number") {
+            setFollowersCount(result.data.followerCount);
+          }
+        }
+      } catch {
+        // Non-blocking: leave the button in its default (not following) state.
+      }
+    };
+
+    fetchFollowStatus();
+  }, [artistId]);
+
+  const handleAuthRedirect = (path: string) => {
+    startTransition();
+    router.push(path);
+  };
+
+  const handleToggleFollow = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token || !artistId) return;
+
+    setIsFollowLoading(true);
+    const nextFollowing = !isFollowing;
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/follow/${artistId}`,
+        {
+          method: nextFollowing ? "POST" : "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const result = await res.json();
+
+      if (res.ok && result.status === 1) {
+        setIsFollowing(result.data?.isFollowing ?? nextFollowing);
+        if (typeof result.data?.followerCount === "number") {
+          setFollowersCount(result.data.followerCount);
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: result.message || "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch {
+      toast({
+        title: "Error",
+        description: "Unable to update follow status. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsFollowLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) {
@@ -89,8 +194,10 @@ export default function ArtistProfile({
             name: artistData.name,
             bio: artistData.bio,
             profile_picture: artistData.profile_picture,
+            followersCount: artistData.followers_count ?? 0,
             address: artistAddress,
           });
+          setFollowersCount(artistData.followers_count ?? 0);
         } else {
           setError(artistResult.message || "Failed to fetch artist details.");
           setIsLoading(false);
@@ -175,11 +282,26 @@ export default function ArtistProfile({
     );
   }
 
+  const locationLabel = artist.address?.city
+    ? `${artist.address.city}, ${artist.address.country}`
+    : "Location not available";
+
+  const artistInitials = artist.name
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
   return (
-    <div className="space-y-8">
-      <header className="bg-card p-8 rounded-lg shadow-lg">
-        <div className="flex flex-col md:flex-row items-center gap-8">
-          <Avatar className="h-32 w-32 border-4 border-background shadow-md overflow-hidden rounded-full text-2xl">
+    <div className="mx-auto max-w-6xl space-y-8">
+      <h1 className="font-headline text-2xl font-bold md:text-3xl">
+        Artist Profile
+      </h1>
+
+      <section className="rounded-xl border bg-card p-6 shadow-sm md:p-8">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+          <Avatar className="h-28 w-28 shrink-0 self-center overflow-hidden rounded-full border-4 border-background text-2xl shadow-md ring-2 ring-primary/15 sm:self-start md:h-36 md:w-36 md:text-3xl">
             {artist.profile_picture && (
               <AvatarImage
                 src={`${process.env.NEXT_PUBLIC_IMAGE_BASE_URL}${artist.profile_picture}`}
@@ -187,31 +309,155 @@ export default function ArtistProfile({
                 data-ai-hint="artist portrait"
               />
             )}
-            <AvatarFallback>
-              {artist.name
-                .split(" ")
-                .map((n) => n[0])
-                .slice(0, 2)
-                .join("")
-                .toUpperCase()}
+            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 font-semibold text-primary">
+              {artistInitials}
             </AvatarFallback>
           </Avatar>
-          <div className="text-center md:text-left">
-            <h1 className="font-headline text-4xl font-bold">{artist.name}</h1>
-            <p className="text-muted-foreground mt-1">
-              {artist.address?.city || "Location not available"},{" "}
-              {artist.address?.country}
-            </p>
-            <div className="mt-4 prose prose-sm text-muted-foreground max-w-2xl">
-              <p>{artist.bio}</p>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-headline text-2xl font-bold md:text-3xl">
+                    {artist.name}
+                  </h2>
+                  <Badge
+                    variant="outline"
+                    className="border-accent/30 bg-accent/10 text-accent"
+                  >
+                    <Palette className="mr-1 h-3 w-3" />
+                    Artist
+                  </Badge>
+                </div>
+                <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5 shrink-0" />
+                  {locationLabel}
+                </p>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2">
+                {!isSelf &&
+                  (isLoggedIn ? (
+                    <Button
+                      onClick={handleToggleFollow}
+                      disabled={isFollowLoading}
+                      variant={isFollowing ? "outline" : "default"}
+                      className={
+                        isFollowing
+                          ? "border-primary text-primary hover:bg-primary/10 hover:text-primary"
+                          : "bg-primary hover:bg-primary/90"
+                      }
+                    >
+                      {isFollowLoading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : isFollowing ? (
+                        <UserCheck className="mr-2 h-4 w-4" />
+                      ) : (
+                        <UserPlus className="mr-2 h-4 w-4" />
+                      )}
+                      {isFollowing ? "Following" : "Follow"}
+                    </Button>
+                  ) : (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button className="bg-primary hover:bg-primary/90">
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          Follow
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Authentication Required
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Please log in or create an account to follow this
+                            artist.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() =>
+                              handleAuthRedirect("/signup?type=customer")
+                            }
+                            className="bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+                          >
+                            Sign Up
+                          </AlertDialogAction>
+                          <AlertDialogAction
+                            onClick={() => handleAuthRedirect("/login")}
+                          >
+                            Log In
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  ))}
+              </div>
             </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+              <span>
+                <span className="font-semibold text-foreground">
+                  {totalProducts}
+                </span>{" "}
+                <span className="text-muted-foreground">
+                  {totalProducts === 1 ? "Artwork" : "Artworks"}
+                </span>
+              </span>
+              <span aria-hidden className="text-muted-foreground/40">
+                |
+              </span>
+              <span>
+                <span className="font-semibold text-foreground">
+                  {followersCount}
+                </span>{" "}
+                <span className="text-muted-foreground">
+                  {followersCount === 1 ? "Follower" : "Followers"}
+                </span>
+              </span>
+            </div>
+
+            {artist.bio && (
+              <div className="mt-5">
+                <h3 className="mb-1.5 font-semibold text-foreground">
+                  About Artist
+                </h3>
+                <p
+                  className={`text-sm leading-relaxed text-muted-foreground ${
+                    isBioExpanded ? "" : "line-clamp-3"
+                  }`}
+                >
+                  {artist.bio}
+                </p>
+                {artist.bio.length > 180 && (
+                  <button
+                    type="button"
+                    onClick={() => setIsBioExpanded((v) => !v)}
+                    className="mt-1.5 text-sm font-medium text-primary hover:underline"
+                  >
+                    {isBioExpanded ? "Show less" : "Read more"}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
-      </header>
+      </section>
 
-      <Separator />
-
-      <main>
+      <main className="space-y-6">
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b pb-4">
+          <div>
+            <h2 className="font-headline text-2xl font-bold md:text-3xl">
+              Artworks
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {totalProducts} {totalProducts === 1 ? "piece" : "pieces"} by{" "}
+              {artist.name}
+            </p>
+          </div>
+        </div>
         {products.length > 0 ? (
           <>
             <div className="columns-2 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">

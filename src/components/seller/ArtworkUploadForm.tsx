@@ -1141,8 +1141,11 @@ export default function ArtworkUploadForm({
                             placeholder="Width (In Inches)"
                             type="number"
                             {...field}
-                            value={field.value ?? ""}
-                            onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                            value={Number.isFinite(field.value) ? field.value : ""}
+                            onChange={(e) => {
+                              const value = e.target.valueAsNumber;
+                              field.onChange(Number.isNaN(value) ? undefined : value);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1159,8 +1162,11 @@ export default function ArtworkUploadForm({
                             placeholder="Height (In Inches)"
                             type="number"
                             {...field}
-                            value={field.value ?? ""}
-                            onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                            value={Number.isFinite(field.value) ? field.value : ""}
+                            onChange={(e) => {
+                              const value = e.target.valueAsNumber;
+                              field.onChange(Number.isNaN(value) ? undefined : value);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1177,8 +1183,11 @@ export default function ArtworkUploadForm({
                             placeholder="Depth (In Inches)"
                             type="number"
                             {...field}
-                            value={field.value ?? ""}
-                            onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                            value={Number.isFinite(field.value) ? field.value : ""}
+                            onChange={(e) => {
+                              const value = e.target.valueAsNumber;
+                              field.onChange(Number.isNaN(value) ? undefined : value);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1195,8 +1204,11 @@ export default function ArtworkUploadForm({
                             placeholder="Weight (Gram)"
                             type="number"
                             {...field}
-                            value={field.value ?? ""}
-                            onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                            value={Number.isFinite(field.value) ? field.value : ""}
+                            onChange={(e) => {
+                              const value = e.target.valueAsNumber;
+                              field.onChange(Number.isNaN(value) ? undefined : value);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1360,7 +1372,7 @@ export default function ArtworkUploadForm({
                                     : Number(e.target.value),
                                 )
                               }
-                              value={field.value ?? ""}
+                              value={Number.isFinite(field.value) ? field.value : ""}
                             />
                           </FormControl>
                         </div>
