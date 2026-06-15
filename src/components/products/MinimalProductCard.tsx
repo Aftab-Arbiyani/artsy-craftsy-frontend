@@ -16,10 +16,11 @@ const MinimalProductCard = ({ product }: MinimalProductCardProps) => {
       : "https://placehold.co/600x400.png";
 
   const discount = product.discount ?? 0;
-  const hasDiscount = discount > 0 && product.price;
-  const discountedPrice = hasDiscount
-    ? product.price * (1 - discount / 100)
-    : product.price;
+  const hasDiscount = discount > 0 && product.price !== undefined && product.price > 0;
+  const discountedPrice =
+    product.price !== undefined
+      ? product.price * (1 - discount / 100)
+      : undefined;
 
   return (
     <Link href={`/products/${product.id}`} className="block group">

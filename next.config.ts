@@ -35,15 +35,6 @@ const nextConfig: NextConfig = {
       // add more patterns for other AWS image URLs if required
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: "http://localhost:3000/api/:path*",
-      },
-    ];
-  },
-
   async headers() {
     return [
       {

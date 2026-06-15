@@ -115,6 +115,7 @@ export default async function ArtistProfilePage({
         name: rawArtist.name as string,
         bio: rawArtist.bio as string,
         profile_picture: rawArtist.profile_picture as string | undefined,
+        followersCount: (rawArtist.followers_count as number) ?? 0,
         address:
           rawArtist.addresses?.length > 0
             ? {

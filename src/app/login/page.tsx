@@ -42,9 +42,16 @@ export default function LoginPage() {
   const onSubmit: SubmitHandler<LoginFormValues> = async (data) => {
     setIsLoading(true);
     try {
-      // Determine device type using the user agent
-      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-      const deviceType = isMobile ? "mobile" : "web";
+      // Detect tablets before phones:
+      // - iPadOS 13+ spoofs a Mac UA but has maxTouchPoints > 1
+      // - Android tablets have "Android" but NOT "Mobile"
+      const ua = navigator.userAgent;
+      const isTablet =
+        /iPad/i.test(ua) ||
+        (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1) ||
+        (/Android/i.test(ua) && !/Mobile/i.test(ua));
+      const isMobile = !isTablet && /Mobi|Android/i.test(ua);
+      const deviceType = isTablet ? "tablet" : isMobile ? "mobile" : "web";
 
       // Generate or retrieve a unique device id stored in localStorage
       let deviceId = localStorage.getItem("device_id");
